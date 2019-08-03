@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "acorn": "^6.2.1",
+    "acorn-walk": "^6.2.0",
     "esm": "^3.2.25",
     "symbol-tree": "^3.2.4"
   },

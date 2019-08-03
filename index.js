@@ -171,7 +171,7 @@ class Feuille {
 				}
 
 				let [ ctor, type ] = t;
-				let node = new ctor(tagName, type, signature);
+				let node = new ctor(tagName, type, signature.trim());
 				
 				if (type === types.$tag_start) {
 					tree.appendChild($head, node);
