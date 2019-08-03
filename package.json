@@ -1,0 +1,14 @@
+{
+  "name": "feuille",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "acorn": "^6.2.1",
+    "esm": "^3.2.25",
+    "symbol-tree": "^3.2.4"
+  },
+  "scripts": {
+    "test": "node -r esm index.test.js"
+  }
+}
