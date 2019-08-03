@@ -24,9 +24,9 @@ export class Comment extends Node {
 };
 
 export class Text extends Node {
-	constructor() {
+	constructor(value) {
 		super();
-		this.value = '';
+		this.value = value || '';
 	}
 
 	eval() {
@@ -112,7 +112,7 @@ export class IfTag extends Tag {
 
 export class RawTag extends Tag {
 	static tagNames = ['raw', 'verbatim'];
-	static raw = true;
+	static scope = 'raw';
 }
 
 export class FilterTag extends Tag {

@@ -13,7 +13,7 @@ const tokens = {
 	CEND: '#}'
 };
 
-const lookup = Object.keys(tokens).reduce(
+const isToken = Object.keys(tokens).reduce(
 	(acc, key) => (acc[tokens[key]] = true, acc), {}
 );
 
@@ -36,143 +36,137 @@ class Feuille {
 	}
 
 	parse(contents, f = '(String)') {
-		let regex = new RegExp(`(${Object.values(tokens).join('|')})`, 'g');
-		let result = contents.split(regex);
+
+		// Basic error logging
+		let line = 1, line_count = 0, loc = () => `[${f}:${line - line_count}]`;
 
 		let { TSTART, CSTART, ESTART, TEND, CEND, EEND } = tokens;
 
-		let nodeList = [], node;
-
-		let line = 1;
-		let loc = () => `[${f}:${line}]`;
-
-		result.forEach(item => {
-			if (
-				lookup[item] && 
-				(!(node instanceof types.Comment) || item === CEND)
-			) {
-				if (item === CSTART || item === ESTART || item === TSTART) {
-					// block start
-					if (node) {
-						if (node instanceof types.Text) {
-							nodeList.push(node);
-							node = null;
-						} else {
-							throw new Error(`${loc()} Unexpected token ${item}`);
-						}
-					}
-					if (item === CSTART) {
-						node = new types.Comment();
-					} else if (item === ESTART) {
-						node = new types.Expression();
-					} else if (item === TSTART) {
-						node = new types.Tag();
-					}
-				} else if (item === CEND || item === EEND || item === TEND) {
-					// block end
-					if (!node) {
-						throw new Error(`${loc()} Unexpected end: ${item}`);
-					}
-					if (item === CEND) {
-						if (node instanceof types.Comment) {
-							nodeList.push(node);
-							node = null;
-						} else {
-							throw new Error(`${loc()} Unexpected end of comment: ${item}`);
-						}
-					} else if (item === EEND) {
-						if (node instanceof types.Expression) {
-							nodeList.push(node);
-							node = null;
-						} else {
-							throw new Error(`${loc()} Unexpected end of expression: ${item}`);
-						}
-					} else if (item === TEND) {
-						if (node instanceof types.Tag) {
-							if (!node.tagName) {
-								throw new Error(`${loc()} Missing tag nname: ${item}`);
-							}
-							nodeList.push(node);
-							node = null;
-						} else {
-							throw new Error(`${loc()} Unexpected end of block: ${item}`);
-						}
-					}
-				}
-			} else {
-				// text
-				if (!node) {
-					node = new types.Text();
-					node.value += item;
-				} else {
-					if (node instanceof types.Text) {
-						node.value += item;
-					} else if (node instanceof types.Tag) {
-						let res = item.match(/^\s*([^\s]+)\s*(.*?)\s*$/);
-						if (!res) {
-							throw new Error(`${loc()} Missing tag`);
-						}
-						let [ str, tagName, signature ] = res;
-						let t = this.tag(tagName);
-						if (t) {
-							let [ctor, type] = t;
-							node = new ctor(tagName, type, signature);
-							if (ctor.raw) {
-								// todo
-							}
-						} else {
-							throw new Error(`${loc()} Unknown tag ${tagName}`);
-						}
-					} else if (node instanceof types.Comment) {
-						node.value += item;
-					} else if (node instanceof types.Expression) {
-						node.value = parse(item);
-					}
-				}
-			}
-			line += (item.match(/\n/g) || []).length;
-		});
-
-		if (node && node instanceof types.Text) {
-			nodeList.push(node);
-			node = null;
-		}
-
-		if (node) {
-			throw new Error(`${loc()} ${node.constructor.name} has not been closed`);
-		}
+		let regex = new RegExp(`(${Object.values(tokens).join('|')})`, 'g');
+		let it = contents.split(regex)[Symbol.iterator]();
 
 		let tree = new SymbolTree();
 		let $root = new types.Root();
 		let $head = $root;
 
-		nodeList.forEach(node => {
-			if (node instanceof types.Text) {
-				tree.appendChild($head, node);
-			} else if (node instanceof types.Comment) {
-				// no-op (we skip Comment nodes)
-			} else if (node instanceof types.Tag) {
-				if (node.type === types.$tag_start) {
+		let is = it.next(), item;
+
+		// The scope stack		
+		let stack = ['content'];
+
+		while (!is.done) {
+
+			item = is.value;
+
+			line_count = (item.match(/\n/g) || []).length;
+			line += line_count;
+
+			// Prepare next iteration
+			is = it.next();
+
+			let scope = stack[stack.length - 1];
+
+			if (item === CSTART) {
+				stack.push('comment');
+				continue;
+			}
+
+			if (item === CEND) {
+				if (scope === 'comment') {
+					stack.pop();			
+				} else {
+					throw new Error(`${loc()} Unexpected ${item}`);
+				}
+				continue;
+			}
+
+			// While we're in the comment's scope,
+			// ignore everything that's not a CSTART / CEND.
+			if (scope === 'comment') continue;
+
+			if (item === ESTART) {
+				if (scope !== 'content') {
+					throw new Error(`${loc()} Unexpected ${item}`);
+				}
+				stack.push('expression');
+				continue;
+			}
+
+			if (item === EEND) {
+				if (scope === 'expression') {
+					stack.pop();
+				} else {
+					throw new Error(`${loc()} Unexpected ${item}`);
+				}
+				continue;
+			}
+
+			if (item === TSTART) {
+				if (scope !== 'content') {
+					throw new Error(`${loc()} Unexpected ${item}`);
+				}
+				stack.push('tag');
+				continue;
+			}
+
+			if (item === TEND) {
+				if (scope === 'tag') {
+					stack.pop();
+				} else {
+					throw new Error(`${loc()} Unexpected ${item}`);
+				}
+				continue;
+			}
+
+			// Static content
+			
+			if (scope === 'content') {
+				tree.appendChild($head, new types.Text(item));
+				continue;
+			}
+
+			if (scope === 'expression') {
+				tree.appendChild($head, new types.Expression(item));
+				continue;
+			}
+
+			if (scope === 'tag') {
+				let res = item.match(/^\s*([^\s]+)\s*(.*?)\s*$/);
+				if (!res) {
+					throw new Error(`${loc()} Missing tag`);
+				}
+				let [ str, tagName, signature ] = res;
+				let t = this.tag(tagName);
+				if (!t) {
+					throw new Error(`${loc()} Unknown tag ${tagName}`);
+				}
+
+				let [ ctor, type ] = t;
+
+				let node = new ctor(tagName, type, signature);
+				
+				if (type === types.$tag_start) {
 					tree.appendChild($head, node);
-					let ctor = node.constructor;
 					if (!ctor.singular) {
 						$head = node;
 					}
-				} else if (node.type === types.$tag_end) {
+				} else if (type === types.$tag_end) {
 					let parent = tree.parent($head);
-					if ($head.constructor !== node.constructor || !parent) {
+					if ($head.constructor !== ctor || !parent) {
 						throw new Error(`Can't close ${$head} with ${node}`);
 					}
 					$head = parent;
-				} else if (node.type === types.$tag_inside) {
-					// todo
+				} else if (type === types.$tag_inside) {
+					// todo (if/elseif/else)
 				}
 
-			} else if (node instanceof types.Expression) {
-				node.value = () => { /* todo */ };
-				tree.appendChild($head, node);
+				continue;
 			}
-		});
+		};
+
+		if (stack.length !== 1) {
+			throw new Error(`${loc()} Unexpected end of template`);
+		}
 
 		if ($head !== $root) {
 			throw new Error(`${$head} left unclosed`);
