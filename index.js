@@ -42,16 +42,45 @@ class Feuille {
 
 		let { TSTART, CSTART, ESTART, TEND, CEND, EEND } = tokens;
 
+		/* 
+			Split the input by relevant tokens, 
+			and obtain an iterator.
+		*/
 		let regex = new RegExp(`(${Object.values(tokens).join('|')})`, 'g');
 		let it = contents.split(regex)[Symbol.iterator]();
 
+		/*
+			The AST tree
+		 */
 		let tree = new SymbolTree();
+
+		/* 
+			Root of the AST tree.
+		*/
 		let $root = new types.Root();
+
+		/*
+			The current insertion point.
+			This is initially the root of the tree,
+			but changes when we enter tags that have
+			opening / closing statements.
+		 */
 		let $head = $root;
 
-		let is = it.next(), item;
+		// Result of the current iteration
+		let is = it.next();
 
-		// The scope stack		
+		// Keeps the value of the current item
+		let item;
+
+		/*
+			The scope stack.
+			Possible values:
+			- content
+			- tag
+			- expression
+			- comment
+		*/
 		let stack = ['content'];
 
 		while (!is.done) {
@@ -92,20 +121,20 @@ class Feuille {
 				continue;
 			}
 
+			if (item === TSTART) {
+				if (scope !== 'content') {
+					throw new Error(`${loc()} Unexpected ${item}`);
+				}
+				stack.push('tag');
+				continue;
+			}
+
 			if (item === EEND) {
 				if (scope === 'expression') {
 					stack.pop();
 				} else {
 					throw new Error(`${loc()} Unexpected ${item}`);
 				}
-				continue;
-			}
-
-			if (item === TSTART) {
-				if (scope !== 'content') {
-					throw new Error(`${loc()} Unexpected ${item}`);
-				}
-				stack.push('tag');
 				continue;
 			}
 
@@ -142,7 +171,6 @@ class Feuille {
 				}
 
 				let [ ctor, type ] = t;
-
 				let node = new ctor(tagName, type, signature);
 				
 				if (type === types.$tag_start) {
@@ -153,7 +181,7 @@ class Feuille {
 				} else if (type === types.$tag_end) {
 					let parent = tree.parent($head);
 					if ($head.constructor !== ctor || !parent) {
-						throw new Error(`Can't close ${$head} with ${node}`);
+						throw new Error(`${loc()} Can't close ${$head} with ${node}`);
 					}
 					$head = parent;
 				} else if (type === types.$tag_inside) {
