@@ -175,10 +175,10 @@ export class IncludeTag extends Tag {
 
 	async render(ctx, env) {
 		let { template, context, only, ignore_missing } = this.args;
-		let inner_context = context === undefined ? {} : context.call(ctx);
-		if (!only) {
-			inner_context.prototype = ctx;
-		}
+		let inner_context = Object.assign(
+			Object.create(only ? env.__ctx : ctx),
+			context === undefined ? {} : context.call(ctx)
+		);
 		return env.render(template.call(ctx), inner_context, ignore_missing);
 	}
 }

@@ -1,5 +1,6 @@
 import SymbolTree from 'symbol-tree';
 import * as types from './node-types';
+import * as fns from './functions';
 import fsLoader from './fs';
 
 import { TAG } from './parse';
@@ -21,10 +22,19 @@ class Enaml {
 
 	constructor(cwd, options = {}) {
 		this.cwd = cwd;
+
 		this.options = {
 			loader: fsLoader,
 			...options
 		};
+
+		/*
+			Default context
+		 */
+		this.__ctx = {};
+		Object.keys(fns).forEach(fn => {
+			this.__ctx[fn] = fns[fn].bind(this);
+		});
 
 		this.tags = {};
 
@@ -221,16 +231,18 @@ class Enaml {
 		});
 	}
 
-	async render(template, ctx = {}) {
+	async render(template, ctx) {
+		let context = Object.assign(Object.create(this.__ctx), ctx);
 		let { loader } = this.options;
 		let contents = await loader(template, this.cwd);
 		let { tree, $root } = this.parse(contents, template);
-		return this.apply(tree, $root, ctx);
+		return this.apply(tree, $root, context);
 	}
 
-	async renderString(contents, ctx = {}) {
+	async renderString(contents, ctx) {
+		let context = Object.assign(Object.create(this.__ctx), ctx);
 		let { tree, $root } = this.parse(contents);
-		return this.apply(tree, $root, ctx);
+		return this.apply(tree, $root, context);
 	}
 
 	tag(tagName) {

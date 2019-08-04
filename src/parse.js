@@ -39,7 +39,6 @@ export function expression(str) {
 		throw new Error(`Invalid expression: ${str}`, err);
 	}
 	let body = chunks.join('');
-	// console.log(body);
 	return new Function(`return ${body}`);
 };
 
