@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 let cwd = 'test/fixtures';
-let fixtures = sync('**/*.html', { cwd });
+let fixtures = sync('*/*.html', { cwd, ignore: ['*/_*.html'] });
 let env = new Enaml(cwd);
 
 // strip trailing newlines

@@ -1,5 +1,5 @@
 import tape from 'tape';
-import { parseExpression } from '../src/expression';
+import { expression } from '../src/parse';
 
 const wrap = body => `function anonymous(\n) {\n${body}\n}`
 
@@ -10,13 +10,18 @@ let tests = {
 	'a.b.c.d': 'return (this.a).b.c.d',
 	'arr[key]': 'return (this.arr)[(this.key)]',
 	'a[b[c[d]]]': 'return (this.a)[(this.b)[(this.c)[(this.d)]]]',
-	'[`note-${p.type}.html`, "note.html"]': 'return [`note-${(this.p).type}.html`, "note.html"]'
+	'[`note-${p.type}.html`, "note.html"]': 'return [`note-${(this.p).type}.html`, "note.html"]',
+
+	// Reserved keywords:
+	'class': 'return (this.class)',
+	'for': 'return (this.for)',
+	'{ class: "my-class", for: "my-input" }': 'return { class: "my-class", for: "my-input" }'
 };
 
-tape('parseExpression', t => {
+tape('expression', t => {
 	Object.entries(tests).forEach(entry => {
 		t.equal(
-			parseExpression(entry[0]).toString(),
+			expression(entry[0]).toString(),
 			wrap(entry[1]),
 			entry[0]
 		);

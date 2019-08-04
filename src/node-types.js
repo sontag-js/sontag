@@ -1,4 +1,10 @@
-import { parseExpression } from './expression';
+import { 
+	expression,
+
+	INCLUDE, 
+	SET, 
+	FOR
+} from './parse';
 
 /*
 	The Node base class
@@ -35,7 +41,7 @@ export class Expression extends Node {
 
 	async render(ctx, env) {
 		if (!this.__fn) {
-			this.__fn = parseExpression(this.__signature);
+			this.__fn = expression(this.__signature);
 		}
 		return this.__fn.call(ctx);
 	}
@@ -135,7 +141,7 @@ export class ExtendsTag extends Tag {
 	get args() {
 		if (!this.__args) {
 			this.__args = {
-				expression: parseExpression(this.__signature)
+				expression: expression(this.__signature)
 			};
 		}
 		return this.__args;
@@ -151,14 +157,13 @@ export class IncludeTag extends Tag {
 
 	get args() {
 		if (!this.__args) {
-			let re = /^(.+?)(\s+ignore\s+missing)?(?:\s+with\s+(.+?))?(\s+only)?$/;
+			let res = this.__signature.match(INCLUDE);
 			// => [str, template, ignore missing, context, only ] 
-			let res = this.__signature.match(re);
 			if (res) {
 				this.__args = {
-					template: parseExpression(res[1]),
+					template: expression(res[1]),
 					ignore_missing: Boolean(res[2]),
-					context: parseExpression(res[3]),
+					context: expression(res[3]),
 					only: Boolean(res[4])
 				};
 			} else {
@@ -170,10 +175,11 @@ export class IncludeTag extends Tag {
 
 	async render(ctx, env) {
 		let { template, context, only, ignore_missing } = this.args;
+		let inner_context = context === undefined ? {} : context.call(ctx);
 		if (!only) {
-			context.prototype = ctx;
+			inner_context.prototype = ctx;
 		}
-		return env.render(this.args.template, context, ignore_missing);
+		return env.render(template.call(ctx), inner_context, ignore_missing);
 	}
 }
 
@@ -205,15 +211,14 @@ export class SetTag extends Tag {
 
 	get args() {
 		if (!this.__args) {
-			let re = /^([^\s]+?)(?:\s*=[^=]*(.+))?$/;
-			let res = this.__signature.match(re);
+			let res = this.__signature.match(SET);
 			// => [str, identifier, expression]
 			if (!res) {
 				throw new Error(`${this}: Syntax error in signature: ${this.__signature}`);
 			}
 			this.__args = {
 				identifier: res[1],
-				value: res[2] ? parseExpression(res[2]) : undefined
+				value: res[2] ? expression(res[2]) : undefined
 			};
 		}
 		return this.__args;
@@ -242,16 +247,13 @@ export class ForTag extends Tag {
 	static insideTagNames = ['else'];
 	get args() {
 		if (!this.__args) {
-			// "item in expression"
-			// "key, value in expression"
-			let re = /^([^\,]+?)(?:\s*\,\s*([^\s]+?))?\s+in\s+(.+)$/;
+			let res = this.__signature.match(FOR);
 			// => [ str, key, value, expression ]
-			let res = this.__signature.match(re);
 			if (res) {
 				this.__args = {
 					value: res[2] === undefined ? res[1] : res[2],
 					key: res[2] === undefined ? undefined : res[1],
-					collection: parseExpression(res[3])
+					collection: expression(res[3])
 				}; 
 			} else {
 				throw new Error(`${this}: Syntax error`);

@@ -1,7 +1,8 @@
 import SymbolTree from 'symbol-tree';
 import * as types from './node-types';
-import { parse } from 'acorn';
 import fsLoader from './fs';
+
+import { TAG } from './parse';
 
 const tokens = {
 	TSTART: '{%',
@@ -160,7 +161,7 @@ class Enaml {
 			}
 
 			if (scope === 'tag') {
-				let res = item.match(/^\s*([^\s]+)\s*(.*?)\s*$/);
+				let res = item.match(TAG);
 				if (!res) {
 					throw new Error(`${loc()} Missing tag`);
 				}
@@ -227,8 +228,8 @@ class Enaml {
 		return this.apply(tree, $root, ctx);
 	}
 
-	async renderString(str, ctx = {}) {
-		let { tree, $root } = this.parse(str);
+	async renderString(contents, ctx = {}) {
+		let { tree, $root } = this.parse(contents);
 		return this.apply(tree, $root, ctx);
 	}
 
