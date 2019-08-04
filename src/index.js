@@ -1,8 +1,7 @@
-import { readFile } from 'fs';
-import { join } from 'path';
 import SymbolTree from 'symbol-tree';
 import * as types from './node-types';
 import { parse } from 'acorn';
+import fsLoader from './fs';
 
 const tokens = {
 	TSTART: '{%',
@@ -22,6 +21,7 @@ class Enaml {
 	constructor(cwd, options = {}) {
 		this.cwd = cwd;
 		this.options = {
+			loader: fsLoader,
 			...options
 		};
 
@@ -221,20 +221,15 @@ class Enaml {
 	}
 
 	async render(template, ctx = {}) {
-		let file = await readFile(join(this.cwd, template), 'utf8');
-		let { tree, $root } = this.parse(file, template);
+		let { loader } = this.options;
+		let contents = await loader(template, this.cwd);
+		let { tree, $root } = this.parse(contents, template);
 		return this.apply(tree, $root, ctx);
 	}
-
-	renderSync(template) {}
 
 	async renderString(str, ctx = {}) {
 		let { tree, $root } = this.parse(str);
 		return this.apply(tree, $root, ctx);
-	}
-
-	renderStringSync(str) {
-
 	}
 
 	tag(tagName) {

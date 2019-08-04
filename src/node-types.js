@@ -259,6 +259,12 @@ export class ForTag extends Tag {
 		}
 		return this.__args;
 	}
+
+	async render(ctx, env, children) {
+		let { key, value, collection } = this.args;
+		let col = Object.entries(await collection(ctx));
+		
+	}
 }
 
 export class IfTag extends Tag {
