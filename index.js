@@ -17,7 +17,7 @@ const isToken = Object.keys(tokens).reduce(
 	(acc, key) => (acc[tokens[key]] = true, acc), {}
 );
 
-class Feuille {
+class Enaml {
 
 	constructor(cwd, options = {}) {
 		this.cwd = cwd;
@@ -175,7 +175,7 @@ class Feuille {
 				
 				if (type === types.$tag_start) {
 					tree.appendChild($head, node);
-					if (!ctor.singular) {
+					if (!node.singular) {
 						$head = node;
 					}
 				} else if (type === types.$tag_end) {
@@ -207,20 +207,21 @@ class Feuille {
 	} 
 
 	async apply(tree, $root, ctx) {
-		let res = $root.eval();
 		let it = tree.childrenIterator($root);
-		let is = it.next();
-		let node;
-		while (!is.done) {
-			node = is.value;
-			res += await this.apply(tree, node, ctx);
-			is = it.next();
-		}
-		return res;
+		return await $root.render(ctx, this, async inner_ctx => {
+			let is = it.next();
+			let node, res = [];
+			while (!is.done) {
+				node = is.value;
+				res.push(await this.apply(tree, node, inner_ctx));
+				is = it.next();
+			}
+			return res.join('');
+		});
 	}
 
 	async render(template, ctx = {}) {
-		let file = await readFile(join(cwd, template), 'utf8');
+		let file = await readFile(join(this.cwd, template), 'utf8');
 		let { tree, $root } = this.parse(file, template);
 		return this.apply(tree, $root, ctx);
 	}
@@ -254,4 +255,4 @@ class Feuille {
 	}
 }
 
-export default Feuille;
+export default Enaml;

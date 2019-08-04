@@ -1,4 +1,4 @@
-import { parse } from 'acorn';
+import { parseExpressionAt } from 'acorn';
 import { simple } from 'acorn-walk';
 
 /*
@@ -6,17 +6,22 @@ import { simple } from 'acorn-walk';
 	is inspired by @substack's falafel:
 	https://github.com/substack/node-falafel/
  */
-export default (str, ctx) => {
+export function parseExpression(str) {
 	let chunks = str.split('');
 	let identifiers = [];
-	simple(parse(str), {
-		Identifier(node) {
-			chunks[node.start] = `(__feuille__ctx__.${node.name})`;
-			for (let i = node.start + 1; i < node.end; i++) {
-				chunks[i] = '';
+	try {
+		simple(parseExpressionAt(str), {
+			Identifier(node) {
+				chunks[node.start] = `(this.${node.name})`;
+				for (let i = node.start + 1; i < node.end; i++) {
+					chunks[i] = '';
+				}
 			}
-		}
-	});
+		});
+	} catch(err) {
+		throw new Error(`Invalid expression: ${str}`, err);
+	}
 	let body = chunks.join('');
-	return new Function('__feuille__ctx__', `return ${body}`);
-}
+	// console.log(body);
+	return new Function(`return ${body}`);
+};

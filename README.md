@@ -1,3 +1,3 @@
-# feuille
+# Enaml
 
-A templating language inspired by Twig.
+The just-enough template language.

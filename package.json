@@ -1,12 +1,14 @@
 {
-  "name": "feuille",
-  "version": "1.0.0",
+  "name": "enaml",
+  "version": "0.1.0",
   "main": "index.js",
   "license": "MIT",
+  "devDependencies": {
+    "esm": "^3.2.25"
+  },
   "dependencies": {
     "acorn": "^6.2.1",
     "acorn-walk": "^6.2.0",
-    "esm": "^3.2.25",
     "symbol-tree": "^3.2.4"
   },
   "scripts": {

@@ -1,4 +1,4 @@
-import expr from './expression';
+import { parseExpression } from './expression';
 
 /*
 	The Node base class
@@ -13,8 +13,8 @@ export class Node {
 		return `${this.constructor.name}`;
 	}
 
-	eval(ctx) {
-		return '';
+	async render(ctx, env, children) {
+		return await children(ctx);
 	}
 };
 
@@ -33,11 +33,11 @@ export class Expression extends Node {
 		this.__signature = signature;
 	}
 
-	eval(ctx) {
+	async render(ctx, env) {
 		if (!this.__fn) {
-			this.__fn = expr(this.__signature);
+			this.__fn = parseExpression(this.__signature);
 		}
-		return this.__fn(ctx);
+		return this.__fn.call(ctx);
 	}
 };
 
@@ -65,7 +65,7 @@ export class Text extends Node {
 		this.value = value || '';
 	}
 
-	eval() {
+	async render() {
 		return this.value;
 	}
 
@@ -89,6 +89,18 @@ export class Tag extends Node {
 
 	toString() {
 		return `${this.constructor.name}(${this.tagName})`;
+	}
+
+	/*
+		Some tags such as {% set %} work either 
+		as singular tags or paired tags, and we only know 
+		at run-time whether a particular tag is self-closing or not. 
+
+		So by default, return the static property defined on the tag, 
+		but allow individual tags to override the logic.
+	 */
+	get singular() {
+		return this.constructor.singular;
 	}
 };
 
@@ -119,6 +131,15 @@ export class EmbedTag extends Tag {
 export class ExtendsTag extends Tag {
 	static tagNames = ['extends'];
 	static singular = true;
+
+	get args() {
+		if (!this.__args) {
+			this.__args = {
+				expression: parseExpression(this.__signature)
+			};
+		}
+		return this.__args;
+	}
 }
 
 /*
@@ -130,20 +151,14 @@ export class IncludeTag extends Tag {
 
 	get args() {
 		if (!this.__args) {
-			// parse signature:
-			// "expression"
-			// "expression ignore missing"
-			// "expression only"
-			// "expression with expression only"
-			// Note: expression can be an array
-			let re = /^(expression)(\s+ignore\s+missing)?(?:\s+with\s+(expression))?(\s+only)?$/;
-			// => [str, template, ignore missing, data, only ] 
+			let re = /^(.+?)(\s+ignore\s+missing)?(?:\s+with\s+(.+?))?(\s+only)?$/;
+			// => [str, template, ignore missing, context, only ] 
 			let res = this.__signature.match(re);
 			if (res) {
 				this.__args = {
-					template: expr(res[1]),
+					template: parseExpression(res[1]),
 					ignore_missing: Boolean(res[2]),
-					data: expr(res[3]),
+					context: parseExpression(res[3]),
 					only: Boolean(res[4])
 				};
 			} else {
@@ -151,6 +166,14 @@ export class IncludeTag extends Tag {
 			}
 		}
 		return this.__args;
+	}
+
+	async render(ctx, env) {
+		let { template, context, only, ignore_missing } = this.args;
+		if (!only) {
+			context.prototype = ctx;
+		}
+		return env.render(this.args.template, context, ignore_missing);
 	}
 }
 
@@ -175,7 +198,39 @@ export class UseTag extends Tag {
 
 export class SetTag extends Tag {
 	static tagNames = ['set'];
-	static singular = true;
+
+	get singular() {
+		return this.args.value !== undefined;
+	}
+
+	get args() {
+		if (!this.__args) {
+			let re = /^([^\s]+?)(?:\s*=[^=]*(.+))?$/;
+			let res = this.__signature.match(re);
+			// => [str, identifier, expression]
+			if (!res) {
+				throw new Error(`${this}: Syntax error in signature: ${this.__signature}`);
+			}
+			this.__args = {
+				identifier: res[1],
+				value: res[2] ? parseExpression(res[2]) : undefined
+			};
+		}
+		return this.__args;
+	}
+
+	async render(ctx, env, children) {
+		await children(ctx);
+		return '';
+	}
+
+	context(outer_context) {
+		let { identifier, value } = this.args;
+		return {
+			// todo
+			[identifier]: value || null 
+		};
+	}
 }
 
 export class BlockTag extends Tag {
@@ -196,7 +251,7 @@ export class ForTag extends Tag {
 				this.__args = {
 					value: res[2] === undefined ? res[1] : res[2],
 					key: res[2] === undefined ? undefined : res[1],
-					collection: expr(res[3])
+					collection: parseExpression(res[3])
 				}; 
 			} else {
 				throw new Error(`${this}: Syntax error`);
