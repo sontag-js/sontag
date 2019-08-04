@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "esm": "^3.2.25"
+    "esm": "^3.2.25",
+    "tape": "^4.11.0"
   },
   "dependencies": {
     "acorn": "^6.2.1",
@@ -12,6 +13,6 @@
     "symbol-tree": "^3.2.4"
   },
   "scripts": {
-    "test": "node -r esm index.test.js"
+    "test": "tape -r esm test/expression.test.js"
   }
 }

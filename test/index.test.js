@@ -1,4 +1,4 @@
-import Enaml from './index';
+import Enaml from '../src/index';
 
 let env = new Enaml();
 

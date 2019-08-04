@@ -76,7 +76,7 @@ export class Text extends Node {
 
 /*
 	Represents a tag, e.g.:
-	{% include 'components/note.feu' %}
+	{% include 'components/note.eml' %}
  */
 export class Tag extends Node {
 	
