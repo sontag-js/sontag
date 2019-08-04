@@ -1,4 +1,4 @@
-import Enaml from '../src/index';
+import Feuille from '../src/index';
 import { sync } from 'fast-glob';
 import tape from 'tape';
 import { readFileSync } from 'fs';
@@ -6,7 +6,7 @@ import { join } from 'path';
 
 let cwd = 'test/fixtures';
 let fixtures = sync('*/*.html', { cwd, ignore: ['*/_*.html'] });
-let env = new Enaml(cwd);
+let env = new Feuille(cwd);
 
 // strip trailing newlines
 const trim = str => str.replace(/(^\n*|\n$)/g, '');

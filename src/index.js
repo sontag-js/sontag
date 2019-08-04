@@ -1,5 +1,6 @@
 import SymbolTree from 'symbol-tree';
 import * as types from './node-types';
+import * as tags from './tags';
 import * as fns from './functions';
 import fsLoader from './fs';
 
@@ -18,7 +19,7 @@ const isToken = Object.keys(tokens).reduce(
 	(acc, key) => (acc[tokens[key]] = true, acc), {}
 );
 
-class Enaml {
+class Feuille {
 
 	constructor(cwd, options = {}) {
 		this.cwd = cwd;
@@ -36,13 +37,10 @@ class Enaml {
 			this.__ctx[fn] = fns[fn].bind(this);
 		});
 
+		// Add built-in tags
 		this.tags = {};
-
-		// add built-in tags
-		Object.values(types).forEach(ctor => {
-			if (ctor.prototype instanceof types.Tag) {
-				this.addTag(ctor);
-			}
+		Object.values(tags).forEach(tag => {
+			this.addTag(tag);
 		});
 	}
 
@@ -263,4 +261,4 @@ class Enaml {
 	}
 }
 
-export default Enaml;
+export default Feuille;
