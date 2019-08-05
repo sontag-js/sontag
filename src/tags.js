@@ -208,16 +208,26 @@ export class BlockTag extends Tag {
 	get args() {
 		if (!this.__args) {
 			this.__args = {
-				name: expression(this.__signature)
+				name: expression(this.__signature),
+				// todo
+				expression: undefined
 			}
 		}
 		return this.__args
 	}
 
 	async render(ctx, env, children) {
-		// todo
-		await children(ctx);
 		return '';
+	}
+
+	async slots() {
+		return {
+			[this.args.name]: await children(ctx)
+		};
+	}
+
+	get singular() {
+		return this.args.expression !== undefined;
 	}
 }
 

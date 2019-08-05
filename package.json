@@ -15,7 +15,7 @@
     "tape": "^4.11.0"
   },
   "dependencies": {
-    "acorn-sontag": "^0.2.0",
+    "acorn-sontag": "^0.3.1",
     "symbol-tree": "^3.2.4"
   },
   "scripts": {

@@ -268,3 +268,4 @@ class Sontag {
 }
 
 export default Sontag;
+export { types };
