@@ -206,6 +206,16 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.6.9.tgz#ffeee23afdc19ab16e979338e7b536fdebbbaeaf"
   integrity sha512-+YB9FtyxXGyD54p8rXwWaN1EWEyar5L58GlGWgtH2I9rGmLGBQcw63+0jw+ujqVavNuO47S1ByAjm9zdHMnskw==
 
+acorn-sontag@^0.2.0:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/acorn-sontag/-/acorn-sontag-0.2.1.tgz#8d0a8bc1c03e8cf726abd8df7f62e6f3a19cea2d"
+  integrity sha512-cv5pzLggRou7T/ptUu6Spmmd0RYAroJukHwOXoI3SfV3mzT3mA2PGanpN0E2pu1N8htBL9fzADKFzJb9cqoWwQ==
+  dependencies:
+    acorn "^6.2.1"
+    acorn-walk "^6.2.0"
+    astring "^1.4.1"
+    estraverse "^4.2.0"
+
 acorn-walk@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-6.2.0.tgz#123cb8f3b84c2171f1f7fb252615b1c78a6b1a8c"
@@ -232,6 +242,11 @@ ansi-styles@^3.2.1:
   integrity sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==
   dependencies:
     color-convert "^1.9.0"
+
+astring@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/astring/-/astring-1.4.1.tgz#ca9c4db43535f01a8bdc32e309a9a4865b2f8872"
+  integrity sha512-CXBXWo/KY1AMtcvXm+92K8y8SQqjs35LJJ2/w5Jlm3srsNyzbRoZmgR05T2Z8CYKH/NpojEtuZThpkwSlMEHKg==
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -366,6 +381,11 @@ esm@^3.2.25:
   version "3.2.25"
   resolved "https://registry.yarnpkg.com/esm/-/esm-3.2.25.tgz#342c18c29d56157688ba5ce31f8431fbb795cc10"
   integrity sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==
+
+estraverse@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-4.2.0.tgz#0dee3fed31fcd469618ce7342099fc1afa0bdb13"
+  integrity sha1-De4/7TH81GlhjOc0IJn8GvoL2xM=
 
 estree-walker@^0.6.1:
   version "0.6.1"

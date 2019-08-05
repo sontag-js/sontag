@@ -1,0 +1,14 @@
+{% apply uppercase %}
+	Hello {{ name }}
+{% endapply %}
+---
+{
+	name: 'Dan',
+	__filters__: {
+		uppercase(str) {
+			return str.toUpperCase();
+		}
+	}
+}
+---
+	HELLO DAN

@@ -1,0 +1,16 @@
+{% with { first_name: 'Catalin' } %}
+	Hello {{ first_name }} {{ last_name }}
+{% endwith %}
+{% with { first_name: 'Catalin' } only %}
+	Hello {{ first_name }} {{ last_name }}
+{% endwith %}
+---
+{
+	first_name: 'Dan',
+	last_name: 'Burzo'
+}
+---
+	Hello Catalin Burzo
+
+
+	Hello Catalin 

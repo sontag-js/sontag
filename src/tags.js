@@ -2,7 +2,8 @@ import {
 	expression,
 	INCLUDE, 
 	SET, 
-	FOR
+	FOR,
+	WITH
 } from './parse';
 
 import { Tag } from './node-types';
@@ -18,6 +19,21 @@ import { Tag } from './node-types';
  */
 export class ApplyTag extends Tag {
 	static tagNames = ['apply', 'filter'];
+	get args() {
+		if (!this.__args) {
+			this.__args = {
+				expression: expression(`__sentinel__ | ${this.__signature}`)
+			};
+		}
+		return this.__args;
+	}
+
+	async render(ctx, env, children) {
+		return this.args.expression.call({
+			...ctx,
+			__sentinel__: await children(ctx)
+		});
+	}
 }
 
 /*
@@ -26,6 +42,19 @@ export class ApplyTag extends Tag {
  */
 export class EmbedTag extends Tag {
 	static tagNames = ['embed'];
+
+	get args() {
+		if (!this.__args) {
+			this.__args = {
+				template: expression(this.__signature)
+			};
+		}
+		return this.__args;
+	}
+
+	async render() {
+		// todo
+	}
 }
 
 /*
@@ -42,6 +71,10 @@ export class ExtendsTag extends Tag {
 			};
 		}
 		return this.__args;
+	}
+
+	async render(ctx, env, children) {
+		// todo
 	}
 }
 
@@ -86,6 +119,14 @@ export class IncludeTag extends Tag {
 export class ImportTag extends Tag {
 	static tagNames = ['import'];
 	static singular = true;
+
+	get args() {
+		// todo
+	}
+
+	async render(ctx, env, children) {
+		// todo
+	}
 }
 
 /*
@@ -93,10 +134,26 @@ export class ImportTag extends Tag {
  */
 export class MacroTag extends Tag {
 	static tagNames = ['macro'];
+
+	get args() {
+		// todo
+	}
+
+	async render(ctx, env, children) {
+		// todo
+	}
 }
 
 export class UseTag extends Tag {
 	static tagNames = ['use'];
+
+	get args() {
+		// todo
+	}
+
+	async render(ctx, env, children) {
+		// todo
+	}
 }
 
 /*
@@ -147,6 +204,21 @@ export class SetTag extends Tag {
 
 export class BlockTag extends Tag {
 	static tagNames = ['block'];
+
+	get args() {
+		if (!this.__args) {
+			this.__args = {
+				name: expression(this.__signature)
+			}
+		}
+		return this.__args
+	}
+
+	async render(ctx, env, children) {
+		// todo
+		await children(ctx);
+		return '';
+	}
 }
 
 export class ForTag extends Tag {
@@ -179,6 +251,14 @@ export class ForTag extends Tag {
 export class IfTag extends Tag {
 	static tagNames = ['if'];
 	static insideTagNames = ['elseif', 'else'];
+
+	get args() {
+		// todo
+	}
+
+	async render() {
+		// todo
+	}
 }
 
 /*
@@ -188,12 +268,53 @@ export class IfTag extends Tag {
 export class RawTag extends Tag {
 	static tagNames = ['raw', 'verbatim'];
 	static scope = 'raw';
+
+	get args() {
+		// todo
+	}
+
+	async render() {
+		// todo
+	}
 }
 
 export class CallTag extends Tag {
 	static tagNames = ['call'];
+
+	get args() {
+		// todo
+	}
+
+	async render(ctx, env, children) {
+		// todo
+	}
 }
 
 export class WithTag extends Tag {
 	static tagNames = ['with'];
+
+	get args() {
+		if (!this.__args) {
+			let res = this.__signature.match(WITH);
+			// => [ str, context, only ]
+			if (!res) {
+				throw new Error(`${this}: Syntax error`);
+			}
+
+			this.__args = {
+				context: expression(res[1]),
+				only: res[2]
+			}
+		}
+		return this.__args;
+	}
+
+	async render(ctx, env, children) {
+		let { context, only } = this.args;
+		let inner_context = Object.assign(
+			Object.create(only ? env.__ctx : ctx),
+			context === undefined ? {} : context.call(ctx)
+		);
+		return children(inner_context);
+	}
 }

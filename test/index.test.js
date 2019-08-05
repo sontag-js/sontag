@@ -15,7 +15,7 @@ tape('fixtures', async t => {
 	t.plan(fixtures.length);
 	await Promise.all(fixtures.map(async template => {
 		let [ input, context, expected ] = readFileSync(join(cwd, template), 'utf8').split('---');
-		context = JSON.parse(context);
+		context = new Function(`return ${context.trim()}`)();
 		input = trim(input);
 		expected = trim(expected);
 		try {
