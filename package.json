@@ -1,6 +1,7 @@
 {
   "name": "sontag",
   "version": "0.1.0",
+  "description": "A just-enough template language.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "license": "MIT",
@@ -21,5 +22,14 @@
   "scripts": {
     "test": "tape -r esm 'test/**/*.test.js' | tap-spec",
     "build": "rollup -c"
-  }
+  },
+  "tags": [
+    "marcel",
+    "sontag",
+    "twig",
+    "liquid",
+    "jinja",
+    "nunjucks",
+    "template-engine"
+  ]
 }

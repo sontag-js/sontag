@@ -1,8 +1,16 @@
 # Sontag
 
-> __Note:__ Sontag is currently a work-in-progress!
+> __Note:__ Sontag is currently a work-in-progress, check back soon!
 
-The just-enough template language.
+A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Liquid](https://shopify.github.io/liquid/), [Jinja](http://jinja.palletsprojects.com/en/2.10.x/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you're familiar with any of these, you'll feel right at home with Sontag.
+
+## A note on security
+
+Just to get this out of the way: Sontag is written with static website generators in mind. The ones where you write the content and the templates yourself and the website gets built into static HTML files for other people to read and enjoy. 
+
+It does __not__ include, at least for the time being, precautions such as autoescaping, nor protection against XSS attacks, nor a sandboxed environment. __Do not use it to generate dynamic output based on user-provided templates or content.__
+
+Now, onwards to the good stuff.
 
 ## Installation
 
@@ -15,6 +23,16 @@ yarn add sontag
 ```
 
 ## Usage
+
+```js
+const Sontag = require('sontag');
+
+const env = new Sontag('./templates', {});
+
+let result = await env.renderString('Hello, {{ name }}!', {
+	name: 'Dan'
+}); // => Hello, Dan!
+```
 
 ## API
 
@@ -99,6 +117,12 @@ env.addTag(MyTag);
 ```
 
 ## Templates
+
+* __Expressions__ are marked with `{{ ... }}`
+* __Tags__ are marked with `{% ... %}`
+* __Comments__ are marked with `{# ... #}`
+
+Everything else is plain text.
 
 ### Tags
 
