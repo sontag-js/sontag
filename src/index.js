@@ -19,7 +19,7 @@ const isToken = Object.keys(tokens).reduce(
 	(acc, key) => (acc[tokens[key]] = true, acc), {}
 );
 
-class Feuille {
+class Sontag {
 
 	constructor(cwd, options = {}) {
 		this.cwd = cwd;
@@ -261,4 +261,4 @@ class Feuille {
 	}
 }
 
-export default Feuille;
+export default Sontag;

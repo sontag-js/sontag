@@ -1,4 +1,4 @@
-import Feuille from '../src/index';
+import Sontag from '../src/index';
 import { sync } from 'fast-glob';
 import tape from 'tape';
 import { readFileSync } from 'fs';
@@ -6,7 +6,7 @@ import { join } from 'path';
 
 let cwd = 'test/fixtures';
 let fixtures = sync('*/*.html', { cwd, ignore: ['*/_*.html'] });
-let env = new Feuille(cwd);
+let env = new Sontag(cwd);
 
 // strip trailing newlines
 const trim = str => str.replace(/(^\n*|\n$)/g, '');
