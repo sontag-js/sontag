@@ -99,8 +99,18 @@ export class UseTag extends Tag {
 	static tagNames = ['use'];
 }
 
+/*
+
+	The {% set %} tag allows assignments.
+	It works both as a self-closing tag,
+	or as a paired tag that captures its content
+	into a variable name.
+
+	Uses aliases `assign` and `capture`
+	for compatibility with Liquid.
+ */
 export class SetTag extends Tag {
-	static tagNames = ['set'];
+	static tagNames = ['set', 'assign', 'capture'];
 
 	get singular() {
 		return this.args.value !== undefined;

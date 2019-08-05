@@ -2,6 +2,7 @@ import SymbolTree from 'symbol-tree';
 import * as types from './node-types';
 import * as tags from './tags';
 import * as fns from './functions';
+import * as filters from './filters';
 import fsLoader from './fs';
 
 import { TAG } from './parse';
@@ -35,6 +36,11 @@ class Sontag {
 		this.__ctx = {};
 		Object.keys(fns).forEach(fn => {
 			this.__ctx[fn] = fns[fn].bind(this);
+		});
+
+		this.__ctx.__filters__ = {};
+		Object.keys(filters).forEach(f => {
+			this.__ctx.__filters__[f] = filters[f].bind(this);
 		});
 
 		// Add built-in tags
