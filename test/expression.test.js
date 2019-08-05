@@ -15,16 +15,27 @@ let tests = {
 	// Reserved keywords:
 	'class': 'return (this.class)',
 	'for': 'return (this.for)',
-	'{ class: "my-class", for: "my-input" }': 'return { class: "my-class", for: "my-input" }'
+	'{ class: "my-class", for: "my-input" }': 'return { class: "my-class", for: "my-input" }',
+
+	// Unsupported operators
+	'1 // 2': 'Error: These operators are not yet supported: //',
+	'a..z': 'Error: These operators are not yet supported: ..',
+
+	// Operators
+	'1 and 2': 'return 1&&2',
+	'1 or 2': 'return 1||2',
+	'1 b-and 2': 'return 1&2',
+	'1 b-or 2': 'return 1|2',
+	'1 b-xor 2': 'return 1^2'
 };
 
 tape('expression', t => {
 	Object.entries(tests).forEach(entry => {
-		t.equal(
-			expression(entry[0]).toString(),
-			wrap(entry[1]),
-			entry[0]
-		);
+		try {
+			t.equal(expression(entry[0]).toString(), wrap(entry[1]), entry[0]);
+		} catch (err) {
+			t.equal(err.toString(), entry[1], entry[0]);
+		}
 	})
 
 	t.end();
