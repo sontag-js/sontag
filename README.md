@@ -161,7 +161,7 @@ Alias: `filter` (For compatibility with Nunjucks)
 
 #### `embed`
 
-Include another template inside the current template (like `include`), but override any of its blocks (like `embed`):
+Include another template inside the current template (like `include`), but override any of its blocks (like `extends`):
 
 ```twig
 {% embed 'components/note.son' %}
@@ -303,6 +303,8 @@ The title is: {{ title }}
 
 ### Functions
 
+#### `block()`
+
 #### `dump(object)`
 
 Output the stringified JSON of an object in the template, to inspect and debug. 
@@ -317,6 +319,8 @@ The function equivalent of [the `include` tag](#todo).
 
 #### `parent()`
 
+Alias: `super()` (for compatibility with Nunjucks)
+
 Inside a `block` tag, outputs the content of the block as defined in the template we're referencing in the [`extends`](#todo) or [`embed`](#todo) tag. 
 
 ```twig
@@ -327,4 +331,10 @@ Inside a `block` tag, outputs the content of the block as defined in the templat
 {% endblock %}
 ```
 
-> __Note__: in Nunjucks this function is called `super()`, but that's a reserved word in JavaScript, so we're calling it as Twig does.
+#### `source()`
+
+### Filters
+
+#### `batch(number)`
+
+#### `default(value)`

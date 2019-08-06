@@ -1,22 +1,6 @@
 /*
-	The `batch` filter from Twig
-	https://twig.symfony.com/doc/2.x/filters/batch.html
+	Built-in filters
+	----------------
  */
-export function batch(count, arr) {
-	if (!count || count < 1) return arr;
-	let res = [];
-	let current = [];
-	for (let i = 0; i < arr.length; i++) {
-		if (current.length < count) {
-			current.push(arr[i]);
-			if (current.length === count) {
-				res.push(current);
-				current = [];
-			}
-		}
-	}
-	if (current.length) {
-		res.push(current);
-	}
-	return res;
-}
+export { default as batch } from './filters/batch';
+export { default as _default } from './filters/default';

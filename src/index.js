@@ -5,7 +5,7 @@ import * as fns from './functions';
 import * as filters from './filters';
 import fsLoader from './fs';
 
-import { TAG } from './parse';
+export const TAG = /^\s*([^\s]+)\s*([^]+)$/;
 
 const tokens = {
 	TSTART: '{%',
@@ -38,9 +38,15 @@ class Sontag {
 			this.__ctx[fn] = fns[fn].bind(this);
 		});
 
+
+		let _filters = {
+			...filters,
+			'default': filters['_default']
+		};
+		delete _filters._default;
 		this.__ctx.__filters__ = {};
-		Object.keys(filters).forEach(f => {
-			this.__ctx.__filters__[f] = filters[f].bind(this);
+		Object.keys(_filters).forEach(f => {
+			this.__ctx.__filters__[f] = _filters[f].bind(this);
 		});
 
 		// Add built-in tags

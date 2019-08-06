@@ -1,14 +1,8 @@
 import { expression as exp } from 'acorn-sontag';
 
-/*
-	Parses a Sontag-flavored expression,
-	splitting up the filters, etc.
- */
+/* 
+	Parses a Sontag-flavored expression 
+	and returns a function that can evaluate it
+	when it has its `this` attached to a context.
+*/
 export const expression = str => new Function(`return ${exp(str)}`);
-
-export const TAG = /^\s*([^\s]+)\s*([^]+)$/;
-export const INCLUDE = /^([^]+?)(\s+ignore\s+missing)?(?:\s+with\s+([^]+?))?(\s+only)?$/;
-export const SET = /^([^\s]+?)(?:\s*=[^=]*([^]+))?$/;
-export const FOR = /^([^\,]+?)(?:\s*\,\s*([^\s]+?))?\s+in\s+([^]+)$/;
-
-export const WITH = /^([^]+?)?(\s+only)?$/;
