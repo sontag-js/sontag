@@ -206,10 +206,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.6.9.tgz#ffeee23afdc19ab16e979338e7b536fdebbbaeaf"
   integrity sha512-+YB9FtyxXGyD54p8rXwWaN1EWEyar5L58GlGWgtH2I9rGmLGBQcw63+0jw+ujqVavNuO47S1ByAjm9zdHMnskw==
 
-acorn-sontag@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/acorn-sontag/-/acorn-sontag-0.3.1.tgz#4bc42dac7f20bb8d9aa81f64d6ecc7bd60fa0200"
-  integrity sha512-iOS24R+p0SLEKPweCTWiEqmFnh8PWMz1sgWz6vOUh7bjwCNZ1HnerVTlzkkRWPcvMZxP0vcvW9ZspvVQ5NsH4A==
+acorn-sontag@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/acorn-sontag/-/acorn-sontag-0.4.0.tgz#ab7211d3b7226ca1edf4f29c67e6f0025096c60e"
+  integrity sha512-ULyMqMbkm7EAT+ViqxFzl3MAjMJ8BMqUV0od6gveA4Sdnnh8jalH/C/i2Qzuy8c0ThE8ImXLsXtdRtDMYkVxEA==
   dependencies:
     acorn "^6.2.1"
     acorn-walk "^6.2.0"

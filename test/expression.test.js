@@ -19,7 +19,7 @@ let tests = {
 
 	// Special operators
 	'a..z': 'return this.__filters__.range(this.a, this.z)',
-	'1 // 2': 'return Math.floor(1 / 2)',
+	'1 // 2': 'return Math.trunc(1 / 2)',
 
 	// Operators
 	'1 and 2': 'return 1 && 2',

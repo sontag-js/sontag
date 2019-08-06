@@ -6,4 +6,6 @@ import { expression as exp } from 'acorn-sontag';
 	when it has its `this` attached to a context.
 */
 let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-export const expression = str => new AsyncFunction(`return ${exp(str)}`);
+export const expression = str => new AsyncFunction(
+	`return ${ exp(str, { async: true }) }`
+);
