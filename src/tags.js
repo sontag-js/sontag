@@ -19,13 +19,11 @@ import { Tag } from './node-types';
  */
 export class ApplyTag extends Tag {
 	static tagNames = ['apply', 'filter'];
-	get args() {
-		if (!this.__args) {
-			this.__args = {
-				expression: expression(`__sentinel__ | ${this.__signature}`)
-			};
+	
+	parseArgs(signature) {
+		return {
+			expression: expression(`__sentinel__ | ${signature}`)
 		}
-		return this.__args;
 	}
 
 	async render(ctx, env, children) {
@@ -43,13 +41,10 @@ export class ApplyTag extends Tag {
 export class EmbedTag extends Tag {
 	static tagNames = ['embed'];
 
-	get args() {
-		if (!this.__args) {
-			this.__args = {
-				template: expression(this.__signature)
-			};
+	parseArgs(signature) {
+		return {
+			template: expression(this.__signature)
 		}
-		return this.__args;
 	}
 
 	async render() {
@@ -64,13 +59,10 @@ export class ExtendsTag extends Tag {
 	static tagNames = ['extends'];
 	static singular = true;
 
-	get args() {
-		if (!this.__args) {
-			this.__args = {
-				expression: expression(this.__signature)
-			};
-		}
-		return this.__args;
+	parseArgs(signature) {
+		return {
+			expression: expression(signature)
+		};
 	}
 
 	async render(ctx, env, children) {
@@ -85,22 +77,16 @@ export class IncludeTag extends Tag {
 	static tagNames = ['include'];
 	static singular = true;
 
-	get args() {
-		if (!this.__args) {
-			let res = this.__signature.match(INCLUDE);
-			// => [str, template, ignore missing, context, only ] 
-			if (res) {
-				this.__args = {
-					template: expression(res[1]),
-					ignore_missing: Boolean(res[2]),
-					context: expression(res[3]),
-					only: Boolean(res[4])
-				};
-			} else {
-				throw new Error(`${this}: Syntax error`);
-			}
-		}
-		return this.__args;
+	parseArgs(signature) {
+		let res = signature.match(INCLUDE); 
+		// => [str, template, ignore missing, context, only ] 
+		if (!res) throw new Error(`${this}: Syntax error`);
+		return {
+			template: expression(res[1]),
+			ignore_missing: Boolean(res[2]),
+			context: expression(res[3]),
+			only: Boolean(res[4])
+		};
 	}
 
 	async render(ctx, env) {
@@ -120,7 +106,7 @@ export class ImportTag extends Tag {
 	static tagNames = ['import'];
 	static singular = true;
 
-	get args() {
+	parseArgs(signature) {
 		// todo
 	}
 
@@ -135,7 +121,7 @@ export class ImportTag extends Tag {
 export class MacroTag extends Tag {
 	static tagNames = ['macro'];
 
-	get args() {
+	parseArgs(signature) {
 		// todo
 	}
 
@@ -147,7 +133,7 @@ export class MacroTag extends Tag {
 export class UseTag extends Tag {
 	static tagNames = ['use'];
 
-	get args() {
+	parseArgs(signature) {
 		// todo
 	}
 
@@ -173,19 +159,13 @@ export class SetTag extends Tag {
 		return this.args.value !== undefined;
 	}
 
-	get args() {
-		if (!this.__args) {
-			let res = this.__signature.match(SET);
-			// => [str, identifier, expression]
-			if (!res) {
-				throw new Error(`${this}: Syntax error in signature: ${this.__signature}`);
-			}
-			this.__args = {
-				identifier: res[1],
-				value: res[2] ? expression(res[2]) : undefined
-			};
-		}
-		return this.__args;
+	parseArgs(signature) {
+		let res = signature.match(SET); // => [str, identifier, expression]
+		if (!res) throw new Error(`${this}: Syntax error`);
+		return {
+			identifier: res[1],
+			value: res[2] ? expression(res[2]) : undefined
+		};
 	}
 
 	async render(ctx, env, children) {
@@ -205,15 +185,12 @@ export class SetTag extends Tag {
 export class BlockTag extends Tag {
 	static tagNames = ['block'];
 
-	get args() {
-		if (!this.__args) {
-			this.__args = {
-				name: expression(this.__signature),
-				// todo
-				expression: undefined
-			}
-		}
-		return this.__args
+	parseArgs(signature) {
+		return {
+			name: expression(signature),
+			// todo
+			expression: undefined
+		};
 	}
 
 	async render(ctx, env, children) {
@@ -234,21 +211,15 @@ export class BlockTag extends Tag {
 export class ForTag extends Tag {
 	static tagNames = ['for'];
 	static insideTagNames = ['else'];
-	get args() {
-		if (!this.__args) {
-			let res = this.__signature.match(FOR);
-			// => [ str, key, value, expression ]
-			if (res) {
-				this.__args = {
-					value: res[2] === undefined ? res[1] : res[2],
-					key: res[2] === undefined ? undefined : res[1],
-					collection: expression(res[3])
-				}; 
-			} else {
-				throw new Error(`${this}: Syntax error`);
-			}
+
+	parseArgs(signature) {
+		let res = signature.match(FOR); // => [ str, key, value, expression ]
+		if (!res) throw new Error(`${this}: Syntax error`);
+		return {
+			value: res[2] === undefined ? res[1] : res[2],
+			key: res[2] === undefined ? undefined : res[1],
+			collection: expression(res[3])
 		}
-		return this.__args;
 	}
 
 	async render(ctx, env, children) {
@@ -262,7 +233,7 @@ export class IfTag extends Tag {
 	static tagNames = ['if'];
 	static insideTagNames = ['elseif', 'else'];
 
-	get args() {
+	parseArgs(signature) {
 		// todo
 	}
 
@@ -279,7 +250,7 @@ export class RawTag extends Tag {
 	static tagNames = ['raw', 'verbatim'];
 	static scope = 'raw';
 
-	get args() {
+	parseArgs(signature) {
 		// todo
 	}
 
@@ -291,7 +262,7 @@ export class RawTag extends Tag {
 export class CallTag extends Tag {
 	static tagNames = ['call'];
 
-	get args() {
+	parseArgs(signature) {
 		// todo
 	}
 
@@ -301,22 +272,16 @@ export class CallTag extends Tag {
 }
 
 export class WithTag extends Tag {
+
 	static tagNames = ['with'];
 
-	get args() {
-		if (!this.__args) {
-			let res = this.__signature.match(WITH);
-			// => [ str, context, only ]
-			if (!res) {
-				throw new Error(`${this}: Syntax error`);
-			}
-
-			this.__args = {
-				context: expression(res[1]),
-				only: res[2]
-			}
-		}
-		return this.__args;
+	parseArgs(signature) {
+		let res = signature.match(WITH); // => [ str, context, only ]
+		if (!res) throw new Error(`${this}: Syntax error`);
+		return {
+			context: expression(res[1]),
+			only: res[2]
+		};
 	}
 
 	async render(ctx, env, children) {

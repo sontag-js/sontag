@@ -17,11 +17,9 @@ let tests = {
 	'for': 'return this.for',
 	'{ class: "my-class", for: "my-input" }': 'return {\n  class: "my-class",\n  for: "my-input"\n}',
 
-	// Unsupported operators
-	'1 // 2': 'Error: These operators are not yet supported: //',
-
 	// Special operators
 	'a..z': 'return this.__filters__.range(this.a, this.z)',
+	'1 // 2': 'return Math.floor(1 / 2)',
 
 	// Operators
 	'1 and 2': 'return 1 && 2',

@@ -82,7 +82,7 @@ function myFilter(arg1, arg2, ...args) {
 
 The filter function can optionally be asynchronous (using the `async` keyword in front of the function declaration).
 
-### `env.addTag(constructor)`
+#### `env.addTag(constructor)`
 
 Add a custom tag to the Sontag environment. The tag needs to inherit the `types.Tag` class. There are a few relevant properties, described below:
 
@@ -123,6 +123,29 @@ env.addTag(MyTag);
 * __Comments__ are marked with `{# ... #}`
 
 Everything else is plain text.
+
+### Expressions
+
+All the usual JavaScript operators are available inside tags and expressions. Alternative operators are implemented for compatibility with other templating languages, so you can use these if you prefer:
+
+Operator | JavaScript equivalent
+-------- | ---------------------
+`a and b` | `a && b`
+`a or b` | `a || b`
+`not a` | `!a`
+`x b-and y` | `x & y`
+`x b-or y` | `x | y`
+`x b-xor y` | `x ^ y`
+`a // b` | `Math.floor(a / b)`
+`a starts with b` | `a.startsWith(b)`
+`a ends with b` | `a.endsWith(b)`
+`a matches /regex/` | `a.match(/regex/)`
+`a in b` | `b.includes(a)`
+`a..b` | `[a, a+1, ..., b]`
+
+The `|` operator is used to pipe values through [filters](#todo). Filters are functions registered on the Sontag environment which you pipe rather than invoke. You can think of something like `{{ post.title | capitalize | pick(10) }}` as being equivalent to `{{ pick(10, capitalize(post.title)) }}`.
+
+> __Note:__ Since the `|` operator is reserved for filters, you'll need to use the `b-or` operator whenever you need the _bitwise OR_ operator.
 
 ### Tags
 
@@ -280,17 +303,21 @@ The title is: {{ title }}
 
 ### Functions
 
-#### `dump(variable)`
+#### `dump(object)`
 
-Output the stringified JSON of a variable in the template. 
+Output the stringified JSON of an object in the template, to inspect and debug. 
 
 ```twig
 {{ dump(post.title) }}
 ```
 
+#### `include(template, context = {}, with_context = true, ignore_missing = false)`
+
+The function equivalent of [the `include` tag](#todo).
+
 #### `parent()`
 
-Inside a `block` tag, outputs the content of the block as defined in the template we're extending. 
+Inside a `block` tag, outputs the content of the block as defined in the template we're referencing in the [`extends`](#todo) or [`embed`](#todo) tag. 
 
 ```twig
 {% extends "base.son" %}
@@ -300,4 +327,4 @@ Inside a `block` tag, outputs the content of the block as defined in the templat
 {% endblock %}
 ```
 
-> Note: this is the same function as Nunjuck's `super()`, but JavaScript does not allow us to call it that.
+> __Note__: in Nunjucks this function is called `super()`, but that's a reserved word in JavaScript, so we're calling it as Twig does.

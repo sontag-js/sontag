@@ -1,4 +1,5 @@
 import { expression } from './parse';
+import memo from 'memoize-one';
 
 /*
 	The Node base class
@@ -85,6 +86,15 @@ export class Tag extends Node {
 		this.tagName = tagName;
 		this.$$typeof = type;
 		this.__signature = signature;
+		this.parseArgs = memo(this.parseArgs);
+	}
+
+	parseArgs(signature) {
+		return null;
+	}
+
+	get args() {
+		return this.parseArgs(this.__signature);
 	}
 
 	toString() {
