@@ -34,11 +34,11 @@ export default class SetTag extends Tag {
 		return '';
 	}
 
-	context(outer_context) {
+	async context(outer_context) {
 		let { identifier, value } = this.args;
 		return {
 			// todo
-			[identifier]: value || null 
+			[identifier]: await value.call(outer_context) || null 
 		};
 	}
 }

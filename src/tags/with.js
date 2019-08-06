@@ -20,7 +20,7 @@ export default class WithTag extends Tag {
 		let { context, only } = this.args;
 		let inner_context = Object.assign(
 			Object.create(only ? env.__ctx : ctx),
-			context === undefined ? {} : context.call(ctx)
+			context === undefined ? {} : await context.call(ctx)
 		);
 		return children(inner_context);
 	}

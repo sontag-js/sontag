@@ -26,8 +26,8 @@ export default class IncludeTag extends Tag {
 		let { template, context, only, ignore_missing } = this.args;
 		let inner_context = Object.assign(
 			Object.create(only ? env.__ctx : ctx),
-			context === undefined ? {} : context.call(ctx)
+			context === undefined ? {} : await context.call(ctx)
 		);
-		return env.render(template.call(ctx), inner_context, ignore_missing);
+		return env.render(await template.call(ctx), inner_context, ignore_missing);
 	}
 }

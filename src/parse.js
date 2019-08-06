@@ -5,4 +5,5 @@ import { expression as exp } from 'acorn-sontag';
 	and returns a function that can evaluate it
 	when it has its `this` attached to a context.
 */
-export const expression = str => new Function(`return ${exp(str)}`);
+let AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+export const expression = str => new AsyncFunction(`return ${exp(str)}`);

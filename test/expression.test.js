@@ -1,7 +1,7 @@
 import tape from 'tape';
 import { expression } from '../src/parse';
 
-const wrap = body => `function anonymous(\n) {\n${body}\n}`
+const wrap = body => `async function anonymous(\n) {\n${body}\n}`
 
 let tests = {
 	'1 + 2': 'return 1 + 2',
