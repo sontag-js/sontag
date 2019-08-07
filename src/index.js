@@ -228,8 +228,8 @@ class Sontag {
 	} 
 
 	async apply(tree, $root, ctx) {
-		let it = tree.childrenIterator($root);
 		return await $root.render(ctx, this, async inner_ctx => {
+			let it = tree.childrenIterator($root);
 			let is = it.next();
 			let node, res = [];
 			while (!is.done) {

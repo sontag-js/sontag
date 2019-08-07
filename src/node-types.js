@@ -32,13 +32,15 @@ export class Expression extends Node {
 	constructor(signature) {
 		super();
 		this.__signature = signature;
+		this.parseValue = memo(this.parseValue);
+	}
+
+	parseValue(signature) {
+		return expression(signature);
 	}
 
 	async render(ctx, env) {
-		if (!this.__fn) {
-			this.__fn = expression(this.__signature);
-		}
-		return this.__fn.call(ctx);
+		return this.parseValue(this.__signature).call(ctx);
 	}
 };
 
@@ -84,19 +86,30 @@ export class Tag extends Node {
 	constructor(tagName, type, signature) {
 		super();
 		this.tagName = tagName;
-		this.$$typeof = type;
+		this.$typeof = type;
 		this.__signature = signature;
 		this.parseArgs = memo(this.parseArgs);
 	}
 
+	/*
+		A method meant to be implemented in Tag subclasses
+		to parse the signature into actual arguments.
+	 */
 	parseArgs(signature) {
 		return null;
 	}
 
+	/*
+		The arguments for a Tag node can be read from this.args
+	 */
 	get args() {
 		return this.parseArgs(this.__signature);
 	}
 
+	/*
+		A string representation of the tag, 
+		useful for debugging.
+	 */
 	toString() {
 		return `${this.constructor.name}(${this.tagName})`;
 	}

@@ -22,6 +22,6 @@ export default class WithTag extends Tag {
 			Object.create(only ? env.__ctx : ctx),
 			context === undefined ? {} : await context.call(ctx)
 		);
-		return children(inner_context);
+		return await children(inner_context);
 	}
 }

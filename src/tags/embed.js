@@ -10,7 +10,7 @@ export default class EmbedTag extends Tag {
 
 	parseArgs(signature) {
 		return {
-			template: expression(this.__signature)
+			template: expression(signature)
 		}
 	}
 

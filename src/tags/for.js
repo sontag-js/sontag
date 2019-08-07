@@ -18,8 +18,53 @@ export default class ForTag extends Tag {
 	}
 
 	async render(ctx, env, children) {
+
 		let { key, value, collection } = this.args;
-		let col = Object.entries(await collection(ctx));
-		
+
+		let obj = await collection.call(ctx);
+		if (key !== undefined) {
+			obj = Object.entries(obj);
+		}
+
+		let len = typeof obj.size === 'function' ? obj.size() : obj.length;
+		let loop = {
+			index: 1,
+			index0: 0,
+			revindex: len - 1,
+			revindex0: len,
+			first: true,
+			last: len === 1,
+			length: len,
+			parent: ctx
+		};
+
+		let inner_scope = Object.assign(Object.create(ctx), { loop });
+
+		function updateLoop() {
+			loop.index ++;
+			loop.index0 ++;
+			loop.revindex --;
+			loop.revindex0 --;
+			loop.first = loop.index0 === 0;
+			loop.last = loop.index0 === loop.length - 1;
+		}
+
+		let res = '';
+
+		// Use for...of loop for compatibility
+		// with any iterable object
+		for (let val of obj) {
+			if (key !== undefined) {
+				// entries
+				inner_scope[key] = val[0];
+				inner_scope[value] = val[1];
+			} else {
+				inner_scope[value] = val;
+			}
+			res += await children(inner_scope);
+			updateLoop();
+		}
+
+		return res;
 	}
 }
