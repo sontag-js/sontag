@@ -8,20 +8,20 @@ export default class WithTag extends Tag {
 	static tagNames = ['with'];
 
 	parseArgs(signature) {
-		let res = signature.match(WITH); // => [ str, context, only ]
+		let res = signature.match(WITH); // => [ str, own_scope, only ]
 		if (!res) throw new Error(`${this}: Syntax error`);
 		return {
-			context: expression(res[1]),
+			own_scope: expression(res[1]),
 			only: res[2]
 		};
 	}
 
-	async render(ctx, env, children) {
-		let { context, only } = this.args;
-		let inner_context = Object.assign(
-			Object.create(only ? env.__ctx : ctx),
-			context === undefined ? {} : await context.call(ctx)
+	async render(scope, env, children) {
+		let { own_scope, only } = this.args;
+		let inner_scope = Object.assign(
+			Object.create(only ? env.global_scope : scope),
+			own_scope === undefined ? {} : await own_scope.call(scope)
 		);
-		return await children(inner_context);
+		return await children(inner_scope);
 	}
 }

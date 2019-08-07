@@ -8,7 +8,7 @@ export default class CallTag extends Tag {
 		// todo
 	}
 
-	async render(ctx, env, children) {
+	async render(scope, env, children) {
 		// todo
 	}
 }

@@ -31,11 +31,11 @@ class Sontag {
 		};
 
 		/*
-			Default context
+			Default scope
 		 */
-		this.__ctx = {};
+		this.global_scope = {};
 		Object.keys(fns).forEach(fn => {
-			this.__ctx[fn] = fns[fn].bind(this);
+			this.global_scope[fn] = fns[fn].bind(this);
 		});
 
 
@@ -44,9 +44,9 @@ class Sontag {
 			'default': filters['_default']
 		};
 		delete _filters._default;
-		this.__ctx.__filters__ = {};
+		this.global_scope.__filters__ = {};
 		Object.keys(_filters).forEach(f => {
-			this.__ctx.__filters__[f] = _filters[f].bind(this);
+			this.global_scope.__filters__[f] = _filters[f].bind(this);
 		});
 
 		// Add built-in tags
@@ -227,32 +227,32 @@ class Sontag {
 		};
 	} 
 
-	async apply(tree, $root, ctx) {
-		return await $root.render(ctx, this, async inner_ctx => {
+	async apply(tree, $root, scope) {
+		return await $root.render(scope, this, async inner_scope => {
 			let it = tree.childrenIterator($root);
 			let is = it.next();
 			let node, res = [];
 			while (!is.done) {
 				node = is.value;
-				res.push(await this.apply(tree, node, inner_ctx));
+				res.push(await this.apply(tree, node, inner_scope));
 				is = it.next();
 			}
 			return res.join('');
 		});
 	}
 
-	async render(template, ctx) {
-		let context = Object.assign(Object.create(this.__ctx), ctx);
+	async render(template, context) {
+		let scope = Object.assign(Object.create(this.global_scope), context);
 		let { loader } = this.options;
 		let contents = await loader(template, this.cwd);
 		let { tree, $root } = this.parse(contents, template);
-		return this.apply(tree, $root, context);
+		return this.apply(tree, $root, scope);
 	}
 
-	async renderString(contents, ctx) {
-		let context = Object.assign(Object.create(this.__ctx), ctx);
+	async renderString(contents, context) {
+		let scope = Object.assign(Object.create(this.global_scope), context);
 		let { tree, $root } = this.parse(contents);
-		return this.apply(tree, $root, context);
+		return this.apply(tree, $root, scope);
 	}
 
 	tag(tagName) {

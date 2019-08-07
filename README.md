@@ -238,6 +238,15 @@ The `extends` tag, if present, needs to be the first tag in the template. Any co
 
 #### `for`
 
+```twig
+{% for post in posts %}
+	<article>
+		<h1>{{ post.title }}</h1>
+		{{ post.content }}
+	</article>
+{% endfor %}
+```
+
 #### `if`
 
 #### `import`

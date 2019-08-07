@@ -12,13 +12,13 @@ export default class BlockTag extends Tag {
 		};
 	}
 
-	async render(ctx, env, children) {
+	async render(scope, env, children) {
 		return '';
 	}
 
 	async slots() {
 		return {
-			[this.args.name]: await children(ctx)
+			[this.args.name]: await children(scope)
 		};
 	}
 

@@ -9,7 +9,7 @@ export default class IfTag extends Tag {
 		// todo
 	}
 
-	async render() {
+	async render(scope, env, children) {
 		// todo
 	}
 }

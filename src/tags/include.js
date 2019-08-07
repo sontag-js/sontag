@@ -12,22 +12,22 @@ export default class IncludeTag extends Tag {
 
 	parseArgs(signature) {
 		let res = signature.match(INCLUDE); 
-		// => [str, template, ignore missing, context, only ] 
+		// => [str, template, ignore missing, own_scope, only ] 
 		if (!res) throw new Error(`${this}: Syntax error`);
 		return {
 			template: expression(res[1]),
 			ignore_missing: Boolean(res[2]),
-			context: expression(res[3]),
+			own_scope: expression(res[3]),
 			only: Boolean(res[4])
 		};
 	}
 
-	async render(ctx, env) {
-		let { template, context, only, ignore_missing } = this.args;
-		let inner_context = Object.assign(
-			Object.create(only ? env.__ctx : ctx),
-			context === undefined ? {} : await context.call(ctx)
+	async render(scope, env) {
+		let { template, own_scope, only, ignore_missing } = this.args;
+		let inner_scope = Object.assign(
+			Object.create(only ? env.global_scope : scope),
+			own_scope === undefined ? {} : await own_scope.call(scope)
 		);
-		return env.render(await template.call(ctx), inner_context, ignore_missing);
+		return env.render(await template.call(scope), inner_scope, ignore_missing);
 	}
 }

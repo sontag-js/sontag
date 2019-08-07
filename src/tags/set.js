@@ -29,16 +29,16 @@ export default class SetTag extends Tag {
 		};
 	}
 
-	async render(ctx, env, children) {
-		await children(ctx);
+	async render(scope, env, children) {
+		await children(scope);
 		return '';
 	}
 
-	async context(outer_context) {
+	async context(parent_scope) {
 		let { identifier, value } = this.args;
 		return {
 			// todo
-			[identifier]: await value.call(outer_context) || null 
+			[identifier]: await value.call(parent_scope) || null 
 		};
 	}
 }

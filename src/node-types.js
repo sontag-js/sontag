@@ -14,8 +14,8 @@ export class Node {
 		return `${this.constructor.name}`;
 	}
 
-	async render(ctx, env, children) {
-		return await children(ctx);
+	async render(scope, env, children) {
+		return await children(scope);
 	}
 };
 
@@ -39,8 +39,8 @@ export class Expression extends Node {
 		return expression(signature);
 	}
 
-	async render(ctx, env) {
-		return this.parseValue(this.__signature).call(ctx);
+	async render(scope, env) {
+		return this.parseValue(this.__signature).call(scope);
 	}
 };
 

@@ -14,10 +14,10 @@ export default class ApplyTag extends Tag {
 		}
 	}
 
-	async render(ctx, env, children) {
+	async render(scope, env, children) {
 		return this.args.expression.call({
-			...ctx,
-			__sentinel__: await children(ctx)
+			...scope,
+			__sentinel__: await children(scope)
 		});
 	}
 }
