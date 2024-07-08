@@ -1,4 +1,4 @@
-import { expression } from './parse';
+import { expression } from './parse.js';
 import memo from 'memoize-one';
 
 /*

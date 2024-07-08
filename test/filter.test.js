@@ -1,9 +1,8 @@
-import tape from 'tape';
-import { expression } from '../src/parse';
+import { expression } from '../src/parse.js';
+import assert from 'node:assert';
+import test from 'node:test';
 
-tape('filters', async t => {
-
-	t.plan(4);
+test('filters', async t => {
 	
 	let ctx = {
 		__filters__: {
@@ -14,25 +13,23 @@ tape('filters', async t => {
 		count: 10
 	};
 
-	t.equal(
+	assert.equal(
 		await expression("'Hello World' | lowercase").call(ctx),
 		'hello world'
 	);
 
-	t.equal(
+	assert.equal(
 		await expression("1 | add(count, 5)").call(ctx),
 		16
 	);
 
-	t.equal(
+	assert.equal(
 		await expression("1 | async_add(5)").call(ctx),
 		6
 	);
 
-	t.equal(
+	assert.equal(
 		await expression("1 | async_add(5) | add(1)").call(ctx),
 		14
 	);
-
-	t.end();
 });

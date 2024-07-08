@@ -1,6 +1,6 @@
-import { readFile, exists } from 'fs';
-import { join } from 'path';
-import { promisify } from 'util';
+import { readFile, exists } from 'node:fs';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
 
 const read = promisify(readFile);
 const check = promisify(exists);

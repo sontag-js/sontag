@@ -1,5 +1,5 @@
-import { Tag } from '../node-types';
-import { expression } from '../parse';
+import { Tag } from '../node-types.js';
+import { expression } from '../parse.js';
 
 /*
 	Import macros and other exports from a template.

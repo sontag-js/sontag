@@ -1,5 +1,5 @@
-import { Tag } from '../node-types';
-import { expression } from '../parse';
+import { Tag } from '../node-types.js';
+import { expression } from '../parse.js';
 
 /*
 	Include a template with blocks to override 

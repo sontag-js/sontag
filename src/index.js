@@ -1,9 +1,9 @@
 import SymbolTree from 'symbol-tree';
-import * as types from './node-types';
-import * as tags from './tags';
-import * as fns from './functions';
-import * as filters from './filters';
-import fsLoader from './fs';
+import * as types from './node-types.js';
+import * as tags from './tags.js';
+import * as fns from './functions.js';
+import * as filters from './filters.js';
+import fsLoader from './fs.js';
 
 export const TAG = /^\s*([^\s]+)\s*([^]+)$/;
 

@@ -1,4 +1,4 @@
-import { expression as exp } from 'acorn-sontag';
+import { parseExpression } from 'acorn-sontag';
 
 /* 
 	Parses a Sontag-flavored expression 
@@ -11,5 +11,5 @@ import { expression as exp } from 'acorn-sontag';
 let AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 
 export const expression = str => new AsyncFunction(
-	`return ${ exp(str, { async: true }) }`
+	`return ${ parseExpression(str, { async: true }) }`
 );

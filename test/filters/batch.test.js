@@ -1,21 +1,21 @@
-import { batch } from '../../src/filters';
-import tape from 'tape';
+import { batch } from '../../src/filters.js';
+import assert from 'node:assert';
+import test from 'node:test';
 
-tape('batch', t => {
+test('batch', t => {
 	let arr = ['a', 'b', 'c', 'd'];
-	t.deepEqual(
+	assert.deepEqual(
 		batch(3, arr),
 		[['a', 'b', 'c'], ['d']]
 	);
 
-	t.deepEqual(
+	assert.deepEqual(
 		batch(0, arr),
 		arr
 	)
 
-	t.deepEqual(
+	assert.deepEqual(
 		batch(1, arr),
 		[['a'],['b'],['c'],['d']]
 	);
-	t.end();
 })

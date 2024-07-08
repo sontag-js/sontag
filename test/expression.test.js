@@ -1,5 +1,6 @@
-import tape from 'tape';
-import { expression } from '../src/parse';
+import assert from 'node:assert';
+import test from 'node:test';
+import { expression } from '../src/parse.js';
 
 const wrap = body => `async function anonymous(\n) {\n${body}\n}`
 
@@ -29,14 +30,12 @@ let tests = {
 	'1 b-xor 2': 'return 1 ^ 2'
 };
 
-tape('expression', t => {
+test('expression', t => {
 	Object.entries(tests).forEach(entry => {
 		try {
-			t.equal(expression(entry[0]).toString(), wrap(entry[1]), entry[0]);
+			assert.equal(expression(entry[0]).toString(), wrap(entry[1]), entry[0]);
 		} catch (err) {
-			t.equal(err.toString(), entry[1], entry[0]);
+			assert.equal(err.toString(), entry[1], entry[0]);
 		}
 	})
-
-	t.end();
 });
