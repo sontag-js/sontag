@@ -15,7 +15,7 @@ export class Node {
 	}
 
 	async render(scope, env, children) {
-		return await children(scope);
+		return children(scope);
 	}
 };
 

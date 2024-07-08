@@ -6,10 +6,21 @@ export default class IfTag extends Tag {
 	static insideTagNames = ['elseif', 'else'];
 
 	parseArgs(signature) {
-		// todo
+		return { 
+			expression: expression(signature)
+		};
 	}
 
 	async render(scope, env, children) {
-		// todo
+		if (this.tagName === 'if') {
+			let { expression } = this.args;
+			let condition = await expression.call(scope);
+			return children(scope, condition);
+		} else if (this.tagName === 'elseif') {
+			let { expression } = this.args;
+			return async contition => !contition && await expression.call(scope) ? children(scope) : '';
+		} else if (this.tagName === 'else') {
+			return async condition => !condition ? children(scope) : '';
+		}
 	}
 }

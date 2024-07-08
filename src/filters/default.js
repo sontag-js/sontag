@@ -1,3 +1,3 @@
-export default function _default() {
-	// todo
+export default function _default(fallback, value) {
+	return value || fallback;
 }

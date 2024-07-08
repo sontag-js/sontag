@@ -204,9 +204,18 @@ class Sontag {
 					if ($head.constructor !== ctor || !parent) {
 						throw new Error(`${loc()} Can't close ${$head} with ${node}`);
 					}
-					$head = parent;
+					if ($head.$typeof === types.$tag_start) {
+						$head = parent;
+					} else if ($head.$typeof === types.$tag_inside) {
+						$head =  tree.parent(parent);
+					}
 				} else if (type === types.$tag_inside) {
-					// todo (if/elseif/else)
+					let parent = tree.parent($head);
+					if ($head.constructor !== ctor || !parent) {
+						throw new Error(`${loc()} Can't include ${node} in ${$head}`);
+					}
+					tree.appendChild($head, node);
+					$head = node;
 				}
 
 				continue;
@@ -227,26 +236,27 @@ class Sontag {
 		};
 	} 
 
-	async apply(tree, $root, scope) {
-		return await $root.render(scope, this, async inner_scope => {
+	async apply(tree, $root, scope, condition) {
+		let res = await $root.render(scope, this, async (outer_scope, condition) => {
 			let it = tree.childrenIterator($root);
 			let is = it.next();
 			let node, res = [];
 			while (!is.done) {
 				node = is.value;
-				res.push(await this.apply(tree, node, inner_scope));
+				res.push(await this.apply(tree, node, outer_scope, condition));
 				is = it.next();
 			}
 			return res.join('');
 		});
+		if (typeof res === 'function') {
+			return res(condition);
+		}
+		return res;
 	}
 
 	async render(template, context) {
-		let scope = Object.assign(Object.create(this.global_scope), context);
-		let { loader } = this.options;
-		let contents = await loader(template, this.cwd);
-		let { tree, $root } = this.parse(contents, template);
-		return this.apply(tree, $root, scope);
+		let contents = await this.options.loader(template, this.cwd);
+		return this.renderString(contents, context);
 	}
 
 	async renderString(contents, context) {
@@ -270,6 +280,10 @@ class Sontag {
 		(ctor.insideTagNames || []).forEach(tagName => {
 			this.tags[tagName] = [ctor, types.$tag_inside];
 		});
+	}
+
+	addFilter(name, fn) {
+		this.global_scope.__filters__[name] = fn;
 	}
 }
 
