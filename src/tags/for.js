@@ -19,7 +19,7 @@ export default class ForTag extends Tag {
 
 	async render(scope, env, children) {
 
-		let { key, value, collection } = this.args;
+		let { key, value, collection } = this.args();
 
 		let obj = await collection.call(scope);
 		if (key !== undefined) {

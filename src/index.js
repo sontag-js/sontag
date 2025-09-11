@@ -94,8 +94,7 @@ class Sontag {
 		let line = 1, line_count = 0, loc = () => `[${f}:${line - line_count}]`;
 
 		/* 
-			Split the input by relevant tokens, 
-			and obtain an iterator.
+			Split the input by relevant tokens.
 		*/
 		let regex = new RegExp(`(${Object.values(Tokens).join('|')})`, 'g');
 		let tokens = contents.split(regex);
@@ -119,10 +118,6 @@ class Sontag {
 		 */
 		let $head = $root;
 
-		function peek() {
-			return tokens[0];
-		}
-
 		while (tokens.length) {
 
 			tok = tokens.shift();
@@ -133,7 +128,7 @@ class Sontag {
 			// Consume a comment
 
 			if (tok === Tokens.CSTART) {
-				while (tokens.length && peek() !== Tokens.CEND) {
+				while (tokens.length && tokens[0] !== Tokens.CEND) {
 					tok = tokens.shift();
 				}
 				if (!tokens.length) {
@@ -146,7 +141,7 @@ class Sontag {
 			// Consume an expression
 
 			if (tok === Tokens.ESTART) {
-				while (tokens.length && peek() !== Tokens.EEND) {
+				while (tokens.length && tokens[0] !== Tokens.EEND) {
 					tok = tokens.shift();
 					tree.appendChild($head, new Expression(tok));
 				}
@@ -160,7 +155,7 @@ class Sontag {
 			// Consume a tag
 
 			if (tok === Tokens.TSTART) {
-				while (tokens.length && peek() !== Tokens.TEND) {
+				while (tokens.length && tokens[0] !== Tokens.TEND) {
 					tok = tokens.shift();
 					let res = tok.match(TAG);
 					if (!res) {
@@ -177,7 +172,7 @@ class Sontag {
 					
 					if (type === $tag_start) {
 						tree.appendChild($head, node);
-						if (!node.singular) {
+						if (!node.singular()) {
 							$head = node;
 						}
 					} else if (type === $tag_end) {
@@ -221,22 +216,20 @@ class Sontag {
 		};
 	} 
 
-	async apply(tree, $root, scope, condition) {
-		let res = await $root.render(scope, this, async (outer_scope, condition) => {
-			let it = tree.childrenIterator($root);
-			let is = it.next();
-			let node, res = [];
-			while (!is.done) {
-				node = is.value;
-				res.push(await this.apply(tree, node, outer_scope, condition));
-				is = it.next();
-			}
-			return res.join('');
-		});
-		if (typeof res === 'function') {
-			return res(condition);
+	/*
+		Apply the `scope` to the `$node` node of `tree`.
+	*/
+	async apply(tree, $node, scope, condition) {
+		const renderChildren = async (outer_scope, condition) => {
+			const texts = await Promise.all(
+				tree.childrenToArray($node).map(
+					async $it => await this.apply(tree, $it, outer_scope, condition)
+				)
+			);
+			return texts.join('');
 		}
-		return res;
+		const res = await $node.render(scope, this, renderChildren);
+		return typeof res === 'function' ? res(condition) : res;
 	}
 
 	async render(template, context) {

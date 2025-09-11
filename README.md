@@ -100,7 +100,7 @@ class MyTag extends types.Tag {
 	// depending on the signature used in templates.
 	// Use this getter to decide at run-time whether the 
 	// tag is self-closing.
-	get singular() {
+	singular() {
 		if (some_condition) {
 			return true;
 		} else {

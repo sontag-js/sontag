@@ -22,13 +22,13 @@ export default class BlockTag extends Tag {
 
 	async slots(scope) {
 		return {
-			[this.args.name]: this.args.expression ?
-				this.args.expression.call(scope) : 
+			[this.args().name]: this.args().expression ?
+				this.args().expression.call(scope) : 
 				await children(scope)
 		};
 	}
 
-	get singular() {
-		return this.args.expression !== undefined;
+	singular() {
+		return this.args().expression !== undefined;
 	}
 }

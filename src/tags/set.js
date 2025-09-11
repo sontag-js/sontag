@@ -16,8 +16,8 @@ export const SET = /^([^\s]+?)(?:\s*=[^=]*([^]+))?$/;
 export default class SetTag extends Tag {
 	static tagNames = ['set', 'assign', 'capture'];
 
-	get singular() {
-		return this.args.value !== undefined;
+	singular() {
+		return this.args().value !== undefined;
 	}
 
 	parseArgs(signature) {
@@ -35,7 +35,7 @@ export default class SetTag extends Tag {
 	}
 
 	async context(parent_scope) {
-		let { identifier, value } = this.args;
+		let { identifier, value } = this.args();
 		return {
 			// todo
 			[identifier]: await value.call(parent_scope) || null 

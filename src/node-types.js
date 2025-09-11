@@ -100,9 +100,9 @@ export class Tag extends Node {
 	}
 
 	/*
-		The arguments for a Tag node can be read from this.args
+		The arguments for a Tag node can be read with this.args()
 	 */
-	get args() {
+	args() {
 		return this.parseArgs(this.__signature);
 	}
 
@@ -122,7 +122,7 @@ export class Tag extends Node {
 		So by default, return the static property defined on the tag, 
 		but allow individual tags to override the logic.
 	 */
-	get singular() {
+	singular() {
 		return this.constructor.singular;
 	}
 };
