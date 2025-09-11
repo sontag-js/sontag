@@ -1,13 +1,38 @@
 import SymbolTree from 'symbol-tree';
-import * as types from './node-types.js';
-import * as tags from './tags.js';
-import * as fns from './functions.js';
-import * as filters from './filters.js';
+import { Root, Text, Expression, $tag_start, $tag_end, $tag_inside } from './node-types.js';
 import fsLoader from './fs.js';
+
+// Functions
+import BlockFunction from './functions/block.js';
+import DumpFunction from './functions/dump.js';
+import IncludeFunction from './functions/include.js';
+import ParentFunction from './functions/parent.js';
+import SuperFunction from './functions/parent.js';
+import SourceFunction from './functions/source.js';
+
+// Filters
+import BatchFilter from './filters/batch.js';
+import DefaultFilter from './filters/default.js';
+
+// Tags
+import ApplyTag from './tags/apply.js';
+import BlockTag from './tags/block.js';
+import CallTag from './tags/call.js';
+import EmbedTag from './tags/embed.js';
+import ExtendsTag from './tags/extends.js';
+import ForTag from './tags/for.js';
+import IfTag from './tags/if.js';
+import ImportTag from './tags/import.js';
+import IncludeTag from './tags/include.js';
+import MacroTag from './tags/macro.js';
+import RawTag from './tags/raw.js';
+import SetTag from './tags/set.js';
+import UseTag from './tags/use.js';
+import WithTag from './tags/with.js';
 
 export const TAG = /^\s*([^\s]+)\s*([^]+)$/;
 
-const tokens = {
+const Tokens = {
 	TSTART: '{%',
 	TEND: '%}',
 	ESTART: '{{',
@@ -15,10 +40,6 @@ const tokens = {
 	CSTART: '{#',
 	CEND: '#}'
 };
-
-const isToken = Object.keys(tokens).reduce(
-	(acc, key) => (acc[tokens[key]] = true, acc), {}
-);
 
 class Sontag {
 
@@ -33,27 +54,38 @@ class Sontag {
 		/*
 			Default scope
 		 */
-		this.global_scope = {};
-		Object.keys(fns).forEach(fn => {
-			this.global_scope[fn] = fns[fn].bind(this);
-		});
+		this.global_scope = {
+			// Built-in functions	
+			block: BlockFunction.bind(this),
+			dump: DumpFunction.bind(this),
+			include: IncludeFunction.bind(this),
+			parent: ParentFunction.bind(this),
+			super: SuperFunction.bind(this),
+			source: SourceFunction.bind(this),
 
-
-		let _filters = {
-			...filters,
-			'default': filters['_default']
+			//  Built-in filters
+			__filters__: {
+				batch: BatchFilter.bind(this),
+				default: DefaultFilter.bind(this)
+			}
 		};
-		delete _filters._default;
-		this.global_scope.__filters__ = {};
-		Object.keys(_filters).forEach(f => {
-			this.global_scope.__filters__[f] = _filters[f].bind(this);
-		});
 
-		// Add built-in tags
+		// Built-in tags
 		this.tags = {};
-		Object.values(tags).forEach(tag => {
-			this.addTag(tag);
-		});
+		this.addTag(ApplyTag);
+		this.addTag(BlockTag);
+		this.addTag(CallTag);
+		this.addTag(EmbedTag);
+		this.addTag(ExtendsTag);
+		this.addTag(ForTag);
+		this.addTag(IfTag);
+		this.addTag(ImportTag);
+		this.addTag(IncludeTag);
+		this.addTag(MacroTag);
+		this.addTag(RawTag);
+		this.addTag(SetTag);
+		this.addTag(UseTag);
+		this.addTag(WithTag);
 	}
 
 	parse(contents, f = '(String)') {
@@ -61,14 +93,13 @@ class Sontag {
 		// Basic error logging
 		let line = 1, line_count = 0, loc = () => `[${f}:${line - line_count}]`;
 
-		let { TSTART, CSTART, ESTART, TEND, CEND, EEND } = tokens;
-
 		/* 
 			Split the input by relevant tokens, 
 			and obtain an iterator.
 		*/
-		let regex = new RegExp(`(${Object.values(tokens).join('|')})`, 'g');
-		let it = contents.split(regex)[Symbol.iterator]();
+		let regex = new RegExp(`(${Object.values(Tokens).join('|')})`, 'g');
+		let tokens = contents.split(regex);
+		let tok;
 
 		/*
 			The AST tree
@@ -78,7 +109,7 @@ class Sontag {
 		/* 
 			Root of the AST tree.
 		*/
-		let $root = new types.Root();
+		let $root = new Root();
 
 		/*
 			The current insertion point.
@@ -88,143 +119,97 @@ class Sontag {
 		 */
 		let $head = $root;
 
-		// Result of the current iteration
-		let is = it.next();
+		function peek() {
+			return tokens[0];
+		}
 
-		// Keeps the value of the current item
-		let item;
+		while (tokens.length) {
 
-		/*
-			The scope stack.
-			Possible values:
-			- content
-			- tag
-			- expression
-			- comment
-		*/
-		let stack = ['content'];
+			tok = tokens.shift();
 
-		while (!is.done) {
-
-			item = is.value;
-
-			line_count = (item.match(/\n/g) || []).length;
+			line_count = (tok.match(/\n/g) || []).length;
 			line += line_count;
 
-			// Prepare next iteration
-			is = it.next();
+			// Consume a comment
 
-			let scope = stack[stack.length - 1];
-
-			if (item === CSTART) {
-				stack.push('comment');
-				continue;
-			}
-
-			if (item === CEND) {
-				if (scope === 'comment') {
-					stack.pop();			
-				} else {
-					throw new Error(`${loc()} Unexpected ${item}`);
+			if (tok === Tokens.CSTART) {
+				while (tokens.length && peek() !== Tokens.CEND) {
+					tok = tokens.shift();
 				}
-				continue;
-			}
-
-			// While we're in the comment's scope,
-			// ignore everything that's not a CSTART / CEND.
-			if (scope === 'comment') continue;
-
-			if (item === ESTART) {
-				if (scope !== 'content') {
-					throw new Error(`${loc()} Unexpected ${item}`);
+				if (!tokens.length) {
+					throw new Error(`${loc()} Unterminated comment`);
 				}
-				stack.push('expression');
+				tokens.shift(); // consume CEND
 				continue;
 			}
 
-			if (item === TSTART) {
-				if (scope !== 'content') {
-					throw new Error(`${loc()} Unexpected ${item}`);
+			// Consume an expression
+
+			if (tok === Tokens.ESTART) {
+				while (tokens.length && peek() !== Tokens.EEND) {
+					tok = tokens.shift();
+					tree.appendChild($head, new Expression(tok));
 				}
-				stack.push('tag');
-				continue;
-			}
-
-			if (item === EEND) {
-				if (scope === 'expression') {
-					stack.pop();
-				} else {
-					throw new Error(`${loc()} Unexpected ${item}`);
+				if (!tokens.length) {
+					throw new Error(`${loc()} Unterminated expression`);
 				}
+				tokens.shift(); // consume EEND
 				continue;
 			}
 
-			if (item === TEND) {
-				if (scope === 'tag') {
-					stack.pop();
-				} else {
-					throw new Error(`${loc()} Unexpected ${item}`);
-				}
-				continue;
-			}
+			// Consume a tag
 
-			// Static content
-			
-			if (scope === 'content') {
-				tree.appendChild($head, new types.Text(item));
-				continue;
-			}
+			if (tok === Tokens.TSTART) {
+				while (tokens.length && peek() !== Tokens.TEND) {
+					tok = tokens.shift();
+					let res = tok.match(TAG);
+					if (!res) {
+						throw new Error(`${loc()} Missing tag`);
+					}
+					let [ str, tagName, signature ] = res;
+					let t = this.tag(tagName);
+					if (!t) {
+						throw new Error(`${loc()} Unknown tag ${tagName}`);
+					}
 
-			if (scope === 'expression') {
-				tree.appendChild($head, new types.Expression(item));
-				continue;
-			}
-
-			if (scope === 'tag') {
-				let res = item.match(TAG);
-				if (!res) {
-					throw new Error(`${loc()} Missing tag`);
-				}
-				let [ str, tagName, signature ] = res;
-				let t = this.tag(tagName);
-				if (!t) {
-					throw new Error(`${loc()} Unknown tag ${tagName}`);
-				}
-
-				let [ ctor, type ] = t;
-				let node = new ctor(tagName, type, signature.trim());
-				
-				if (type === types.$tag_start) {
-					tree.appendChild($head, node);
-					if (!node.singular) {
+					let [ ctor, type ] = t;
+					let node = new ctor(tagName, type, signature.trim());
+					
+					if (type === $tag_start) {
+						tree.appendChild($head, node);
+						if (!node.singular) {
+							$head = node;
+						}
+					} else if (type === $tag_end) {
+						let parent = tree.parent($head);
+						if ($head.constructor !== ctor || !parent) {
+							throw new Error(`${loc()} Can't close ${$head} with ${node}`);
+						}
+						if ($head.$typeof === $tag_start) {
+							$head = parent;
+						} else if ($head.$typeof === $tag_inside) {
+							$head =  tree.parent(parent);
+						}
+					} else if (type === $tag_inside) {
+						let parent = tree.parent($head);
+						if ($head.constructor !== ctor || !parent) {
+							throw new Error(`${loc()} Can't include ${node} in ${$head}`);
+						}
+						tree.appendChild($head, node);
 						$head = node;
 					}
-				} else if (type === types.$tag_end) {
-					let parent = tree.parent($head);
-					if ($head.constructor !== ctor || !parent) {
-						throw new Error(`${loc()} Can't close ${$head} with ${node}`);
-					}
-					if ($head.$typeof === types.$tag_start) {
-						$head = parent;
-					} else if ($head.$typeof === types.$tag_inside) {
-						$head =  tree.parent(parent);
-					}
-				} else if (type === types.$tag_inside) {
-					let parent = tree.parent($head);
-					if ($head.constructor !== ctor || !parent) {
-						throw new Error(`${loc()} Can't include ${node} in ${$head}`);
-					}
-					tree.appendChild($head, node);
-					$head = node;
 				}
-
+				if (!tokens.length) {
+					throw new Error(`${loc()} Unterminated tag`);
+				}
+				tokens.shift(); // consume TEND
 				continue;
 			}
-		};
 
-		if (stack.length !== 1) {
-			throw new Error(`${loc()} Unexpected end of template`);
-		}
+			// Consume static content
+
+			tree.appendChild($head, new Text(tok));
+		};
 
 		if ($head !== $root) {
 			throw new Error(`${$head} left unclosed`);
@@ -271,14 +256,14 @@ class Sontag {
 
 	addTag(ctor) {
 		ctor.tagNames.forEach(tagName => {
-			this.tags[tagName] = [ctor, types.$tag_start];
+			this.tags[tagName] = [ctor, $tag_start];
 			if (!ctor.singular) {
-				this.tags[`end${tagName}`] = [ctor, types.$tag_end];
+				this.tags[`end${tagName}`] = [ctor, $tag_end];
 			}
 		});
 
 		(ctor.insideTagNames || []).forEach(tagName => {
-			this.tags[tagName] = [ctor, types.$tag_inside];
+			this.tags[tagName] = [ctor, $tag_inside];
 		});
 	}
 
@@ -288,4 +273,4 @@ class Sontag {
 }
 
 export default Sontag;
-export { types };
+export * as types from './node-types.js';

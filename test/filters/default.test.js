@@ -1,4 +1,4 @@
-import { _default } from '../../src/filters.js';
+import { default as _default } from '../../src/filters/default.js';
 import assert from 'node:assert';
 import test from 'node:test';
 

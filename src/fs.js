@@ -1,36 +1,28 @@
-import { readFile, exists } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { promisify } from 'node:util';
 
-const read = promisify(readFile);
-const check = promisify(exists);
+const cache = new Map();
 
-const __cache__ = new Map();
-
-export default async (candidates, cwd) => {
+export default async function load(candidates, cwd) {
 	
 	if (!Array.isArray(candidates)) {
-		candidates = [ candidates ];
+		candidates = [candidates];
 	}
 
-	let it = candidates[Symbol.iterator]();
-	let is = it.next();
-	while (!is.done) {
-		let template = is.value;
-		is = it.next();
-		if (__cache__.has(template)) {
-			let content = __cache__.get(template);
-			if (content === null) continue;
-			return content;
-		}
-		let path = join(cwd, template);
-		if (await check(path)) {
-			let content = read(path, 'utf8');
-			__cache__.set(template, content);
-			return content;
+	for await(let template of candidates) {
+		let content;
+		if (cache.has(template)) {
+			content = cache.get(template);
 		} else {
-			__cache__.set(template, null);
-			continue;
+			try {
+				content = await readFile(join(cwd, template), 'utf8');
+			} catch(err) {
+				content = null;
+			}
+			cache.set(template, content);
+		}
+		if (content !== null) {
+			return content;
 		}
 	}
 

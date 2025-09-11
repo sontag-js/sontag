@@ -2,7 +2,7 @@
 
 > __Note:__ Sontag is currently a work-in-progress, check back soon!
 
-A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Liquid](https://shopify.github.io/liquid/), [Jinja](http://jinja.palletsprojects.com/en/2.10.x/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you're familiar with any of these, you'll feel right at home with Sontag.
+A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Liquid](https://shopify.github.io/liquid/), [Jinja](http://jinja.palletsprojects.com/en/2.10.x/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you’re familiar with any of these, you’ll feel right at home with Sontag.
 
 ## A note on security
 
@@ -15,21 +15,17 @@ Now, onwards to the good stuff.
 ## Installation
 
 ```bash
-# with npm
 npm install sontag 
-
-# with yarn
-yarn add sontag
 ```
 
 ## Usage
 
 ```js
-const Sontag = require('sontag');
+import Sontag from 'sontag';
 
 const env = new Sontag('./templates', {});
 
-let result = await env.renderString('Hello, {{ name }}!', {
+const result = await env.renderString('Hello, {{ name }}!', {
 	name: 'Dan'
 }); // => Hello, Dan!
 ```
@@ -41,7 +37,7 @@ let result = await env.renderString('Hello, {{ name }}!', {
 Render a template with the given `context`, asynchronously.
 
 ```js
-let result = await env.render('index.son', {
+const result = await env.render('index.son', {
 	content: 'My content'
 });
 ```
@@ -49,7 +45,7 @@ let result = await env.render('index.son', {
 The template path is relative to the `cwd` defined when initializing the environment. You can also pass an array of templates, and the first found will be rendered.
 
 ```js
-let result = await env.render(
+const result = await env.render(
 	['post-special.son', 'post.son', 'index.son'],
 	{
 		content: 'My content'
@@ -62,7 +58,7 @@ let result = await env.render(
 Render a template string asynchronously.
 
 ```js
-let result = await env.render(
+const result = await env.render(
 	"Content: {{ content }}",
 	{
 		content: 'My content'
@@ -145,7 +141,7 @@ Operator | JavaScript equivalent
 
 The `|` operator is used to pipe values through [filters](#todo). Filters are functions registered on the Sontag environment which you pipe rather than invoke. You can think of something like `{{ post.title | capitalize | pick(10) }}` as being equivalent to `{{ pick(10, capitalize(post.title)) }}`.
 
-> __Note:__ Since the `|` operator is reserved for filters, you'll need to use the `b-or` operator whenever you need the _bitwise OR_ operator.
+> __Note:__ Since the `|` operator is reserved for filters, you’ll need to use the `b-or` operator whenever you need the _bitwise OR_ operator.
 
 ### Tags
 
@@ -155,7 +151,7 @@ Alias: `filter` (For compatibility with Nunjucks)
 
 #### `block`
 
-> __Open question:__ Does the block use the context in which it's defined, or the context where it's imported? (See also the `scoped` attribute).
+> __Open question:__ Does the block use the context in which it’s defined, or the context where it’s imported? (See also the `scoped` attribute).
 
 #### `call`
 
@@ -166,16 +162,16 @@ Include another template inside the current template (like `include`), but overr
 ```twig
 {% embed 'components/note.son' %}
 	{% block content %}
-		The note's content
+		The note’s content
 	{% endblock %}
 {% endembed %}
 ```
 
-If you have a single block defined in the template you're including, you can also skip the `block` tag and write directly:
+If you have a single block defined in the template you’re including, you can also skip the `block` tag and write directly:
 
 ```twig
 {% embed 'components/note.son' %}
-	The note's content
+	The note’s content
 {% endembed %}
 ```
 
@@ -183,7 +179,7 @@ You can also take advantage of the short `block` declaration:
 
 ```twig
 {% embed 'components/note.son' %}
-	{% block content "The note's content" %}
+	{% block content "The note’s content" %}
 {% endembed %}
 ```
 
@@ -191,7 +187,7 @@ By default the included template has access to the outer context. You can limit 
 
 ```twig
 {% embed 'components/note.son' only %}
-	{% block content "The note's content" %}
+	{% block content "The note’s content" %}
 {% endembed %}
 ```
 
@@ -199,7 +195,7 @@ You can pass additional content with the `with` keyword:
 
 ```twig
 {% embed 'components/note.son' with { post: posts[0] } %}
-	The block's content
+	The block’s content
 {% endembed %}
 ```
 
@@ -232,7 +228,7 @@ __templates/my-page.son__
 {% endblock %}
 ```
 
-Inside a block, you can use [the `parent()` function](#todo) to get the original content of the block, as defined in the template we're inheriting.
+Inside a block, you can use [the `parent()` function](#todo) to get the original content of the block, as defined in the template we’re inheriting.
 
 The `extends` tag, if present, needs to be the first tag in the template. Any content not included in a block will not get rendered. 
 
@@ -330,7 +326,7 @@ The function equivalent of [the `include` tag](#todo).
 
 Alias: `super()` (for compatibility with Nunjucks)
 
-Inside a `block` tag, outputs the content of the block as defined in the template we're referencing in the [`extends`](#todo) or [`embed`](#todo) tag. 
+Inside a `block` tag, outputs the content of the block as defined in the template we’re referencing in the [`extends`](#todo) or [`embed`](#todo) tag. 
 
 ```twig
 {% extends "base.son" %}
