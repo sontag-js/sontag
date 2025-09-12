@@ -14,6 +14,13 @@ export class Node {
 		return `${this.constructor.name}`;
 	}
 
+	/* 
+		Render the node to a string by applying the `scope`.
+		By default a Node renders its children. 
+
+		Since the tree structure is not available in the class,
+		the function to render children comes from the outside.
+	*/
 	async render(scope, env, children) {
 		return children(scope);
 	}
@@ -21,37 +28,37 @@ export class Node {
 
 /*
 	The Root is the topmost node in the AST.
+	It doesn’t do anything special at the moment.
  */
 export class Root extends Node {};
 
 /*
-	Represents an expression, e.g.
-	{{ post.title }}
+	An expression, e.g. {{ post.title }}
  */
 export class Expression extends Node {
 	constructor(signature) {
 		super();
-		this.__signature = signature;
-		this.parseValue = memo(this.parseValue);
+		this.signature = signature;
+		this.parse = memo(v => expression(v));
 	}
 
-	parseValue(signature) {
-		return expression(signature);
-	}
-
-	async render(scope, env) {
-		return this.parseValue(this.__signature).call(scope);
+	async render(scope) {
+		return this.parse(this.signature).call(scope);
 	}
 };
 
 /*
-	Represents a comment block, e.g.
-	{# Note: See below #}
+	A comment block, e.g. {# Note #}
+	This class is not used at the moment.
  */
 export class Comment extends Node {
-	constructor() {
+	constructor(value) {
 		super();
-		this.value = '';
+		this.value = value || '';
+	}
+
+	async render() {
+		return '';
 	}
 
 	toString() {
@@ -60,7 +67,7 @@ export class Comment extends Node {
 };
 
 /*
-	Represents a run of static text.
+	A run of static text.
  */
 export class Text extends Node {
 	constructor(value) {
@@ -78,8 +85,7 @@ export class Text extends Node {
 };
 
 /*
-	Represents a tag, e.g.:
-	{% include 'components/note.son' %}
+	A tag, e.g. {% include 'components/note.son' %}
  */
 export class Tag extends Node {
 	
@@ -87,7 +93,7 @@ export class Tag extends Node {
 		super();
 		this.tagName = tagName;
 		this.$typeof = type;
-		this.__signature = signature;
+		this.signature = signature;
 		this.parseArgs = memo(this.parseArgs);
 	}
 
@@ -103,7 +109,7 @@ export class Tag extends Node {
 		The arguments for a Tag node can be read with this.args()
 	 */
 	args() {
-		return this.parseArgs(this.__signature);
+		return this.parseArgs(this.signature);
 	}
 
 	/*

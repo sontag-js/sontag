@@ -7,13 +7,5 @@ import { expression } from '../parse.js';
  */
 export default class RawTag extends Tag {
 	static tagNames = ['raw', 'verbatim'];
-	static scope = 'raw';
-
-	parseArgs(signature) {
-		// todo
-	}
-
-	async render() {
-		// todo
-	}
+	static raw = true;
 }
