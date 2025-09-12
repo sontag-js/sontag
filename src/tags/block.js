@@ -16,7 +16,7 @@ export default class BlockTag extends Tag {
 		};
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		return '';
 	}
 

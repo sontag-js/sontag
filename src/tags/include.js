@@ -22,7 +22,7 @@ export default class IncludeTag extends Tag {
 		};
 	}
 
-	async render(scope, env) {
+	async render(scope, children, env) {
 		let { template, own_scope, only, ignore_missing } = this.args();
 		let inner_scope = Object.assign(
 			Object.create(only ? env.global_scope : scope),

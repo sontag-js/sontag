@@ -11,7 +11,7 @@ export default class MacroTag extends Tag {
 		// todo
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		// todo
 	}
 }

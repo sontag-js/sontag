@@ -30,7 +30,7 @@ import SetTag from './tags/set.js';
 import UseTag from './tags/use.js';
 import WithTag from './tags/with.js';
 
-export const TAG = /^\s*([^\s]+)\s*([^]+)$/;
+export const TAG_PARTS = /^\s*([^\s]+)\s*([^]+)$/;
 
 const Tokens = {
 	TSTART: '{%',
@@ -99,6 +99,7 @@ class Sontag {
 		let regex = new RegExp(`(${Object.values(Tokens).join('|')})`, 'g');
 		let tokens = contents.split(regex);
 		let tok;
+		let rawmode = false;
 
 		/*
 			The AST tree
@@ -127,20 +128,20 @@ class Sontag {
 
 			// Consume a comment
 
-			if (tok === Tokens.CSTART) {
+			if (!rawmode && tok === Tokens.CSTART) {
 				while (tokens.length && tokens[0] !== Tokens.CEND) {
 					tok = tokens.shift();
 				}
 				if (!tokens.length) {
 					throw new Error(`${loc()} Unterminated comment`);
 				}
-				tokens.shift(); // consume CEND
+				tok = tokens.shift(); // consume CEND
 				continue;
 			}
 
 			// Consume an expression
 
-			if (tok === Tokens.ESTART) {
+			if (!rawmode && tok === Tokens.ESTART) {
 				while (tokens.length && tokens[0] !== Tokens.EEND) {
 					tok = tokens.shift();
 					tree.appendChild($head, new Expression(tok));
@@ -148,56 +149,80 @@ class Sontag {
 				if (!tokens.length) {
 					throw new Error(`${loc()} Unterminated expression`);
 				}
-				tokens.shift(); // consume EEND
+				tok = tokens.shift(); // consume EEND
 				continue;
 			}
 
 			// Consume a tag
 
 			if (tok === Tokens.TSTART) {
+
+				let start_node = new Text(tok);
+				if (rawmode) {
+					tree.appendChild($head, start_node);
+				}
+
 				while (tokens.length && tokens[0] !== Tokens.TEND) {
 					tok = tokens.shift();
-					let res = tok.match(TAG);
-					if (!res) {
-						throw new Error(`${loc()} Missing tag`);
-					}
-					let [ str, tagName, signature ] = res;
-					let t = this.tag(tagName);
-					if (!t) {
-						throw new Error(`${loc()} Unknown tag ${tagName}`);
-					}
+					const [_, tagName, signature] = tok.match(TAG_PARTS) ?? [];
+					const tag = this.tag(tagName); 
 
-					let [ ctor, type ] = t;
-					let node = new ctor(tagName, type, signature.trim());
-					
-					if (type === $tag_start) {
-						tree.appendChild($head, node);
-						if (!node.singular()) {
-							$head = node;
+					if (rawmode) {
+						if (tag?.constructor.raw && tag?.type === $tag_end) {
+							tree.remove(start_node);
+							rawmode = false;
+						} else {
+							// consume tag as plain text
+							tree.appendChild($head, new Text(tok));
 						}
-					} else if (type === $tag_end) {
-						let parent = tree.parent($head);
-						if ($head.constructor !== ctor || !parent) {
-							throw new Error(`${loc()} Can't close ${$head} with ${node}`);
+					} else {
+
+						if (!tag) {
+							throw new Error(`${loc()} Unknown tag ${tagName}`);
 						}
-						if ($head.$typeof === $tag_start) {
-							$head = parent;
-						} else if ($head.$typeof === $tag_inside) {
-							$head =  tree.parent(parent);
+
+						if (tag.constructor.raw && tag.type === $tag_start) {
+							rawmode = true;
+							// consume TEND so it doesn’t get appended as plain text
+							tok = tokens.shift();
+						} else {
+							let node = new tag.constructor(tagName, tag.type, signature.trim());
+							if (tag.type === $tag_start) {
+								// Start tag (e.g. `if`)
+								tree.appendChild($head, node);
+								if (!node.singular()) {
+									$head = node;
+								}
+							} else if (tag.type === $tag_end) {
+								// End tag (e.g. `endif`)
+								const $parent = tree.parent($head);
+								if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
+									throw new Error(`${loc()} Can't close ${$head} with ${node}`);
+								}
+								// Close the tag by pointing upwards
+								$head = $parent;
+							} else if (tag.type === $tag_inside) {
+								// Inside tag (e.g. `else`, `elseif`)
+								const $parent = tree.parent($head);
+								if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
+									throw new Error(`${loc()} Can't include ${node} in ${$head}`);
+								}
+								node.setRelated($head);
+								tree.appendChild($parent, node);
+								$head = node;
+							}
 						}
-					} else if (type === $tag_inside) {
-						let parent = tree.parent($head);
-						if ($head.constructor !== ctor || !parent) {
-							throw new Error(`${loc()} Can't include ${node} in ${$head}`);
-						}
-						tree.appendChild($head, node);
-						$head = node;
 					}
 				}
-				if (!tokens.length) {
+				if (tokens.length) {
+					// consume TEND
+					tok = tokens.shift();
+					if (rawmode) {
+						tree.appendChild($head, new Text(tok));
+					}
+				} else if (!rawmode) {
 					throw new Error(`${loc()} Unterminated tag`);
 				}
-				tokens.shift(); // consume TEND
 				continue;
 			}
 
@@ -219,17 +244,16 @@ class Sontag {
 	/*
 		Apply the `scope` to the `$node` node of `tree`.
 	*/
-	async apply(tree, $node, scope, condition) {
-		const renderChildren = async (outer_scope, condition) => {
+	async apply(tree, $node, scope) {
+		const renderChildren = async child_scope => {
 			const texts = await Promise.all(
 				tree.childrenToArray($node).map(
-					async $it => await this.apply(tree, $it, outer_scope, condition)
+					async $it => await this.apply(tree, $it, child_scope)
 				)
 			);
 			return texts.join('');
-		}
-		const res = await $node.render(scope, this, renderChildren);
-		return typeof res === 'function' ? res(condition) : res;
+		};
+		return $node.render(scope, renderChildren, this);
 	}
 
 	async render(template, context) {
@@ -247,16 +271,25 @@ class Sontag {
 		return this.tags[tagName];
 	}
 
-	addTag(ctor) {
-		ctor.tagNames.forEach(tagName => {
-			this.tags[tagName] = [ctor, $tag_start];
-			if (!ctor.singular) {
-				this.tags[`end${tagName}`] = [ctor, $tag_end];
+	addTag(TagClass) {
+		TagClass.tagNames.forEach(tagName => {
+			this.tags[tagName] = {
+				constructor: TagClass, 
+				type: $tag_start
+			};
+			if (!TagClass.singular) {
+				this.tags[`end${tagName}`] = {
+					constructor: TagClass, 
+					type: $tag_end
+				};
 			}
 		});
 
-		(ctor.insideTagNames || []).forEach(tagName => {
-			this.tags[tagName] = [ctor, $tag_inside];
+		(TagClass.insideTagNames || []).forEach(tagName => {
+			this.tags[tagName] = {
+				constructor: TagClass, 
+				type: $tag_inside
+			};
 		});
 	}
 

@@ -13,7 +13,9 @@ let env = new Sontag(cwd);
 const trim = str => str.replace(/(^\n*|\n$)/g, '');
 
 fixtures.forEach(template => {
-	test(template, async () => {
+	test(template, { 
+		skip: /\bskip\b/.test(template) 
+	}, async () => {
 		let [ input, context, expected ] = readFileSync(
 			join(cwd, template), 
 			'utf8'

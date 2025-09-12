@@ -10,6 +10,10 @@ import { parseExpression } from 'acorn-sontag';
 // so we need to pick it off an anonymous async function.
 let AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 
+/*
+	Parses the string `str` into an async function.
+	The function then needs to be call()-ed with a certain scope.
+ */
 export function expression(str) {
 	return new AsyncFunction(
 		`return ${ parseExpression(str, { async: true }) }`
