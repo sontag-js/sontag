@@ -14,7 +14,7 @@ export default class ApplyTag extends Tag {
 		}
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		return this.args().expression.call({
 			...scope,
 			__sentinel__: await children(scope)

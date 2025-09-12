@@ -21,7 +21,7 @@ export class Node {
 		Since the tree structure is not available in the class,
 		the function to render children comes from the outside.
 	*/
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		return children(scope);
 	}
 };

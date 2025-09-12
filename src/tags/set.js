@@ -4,7 +4,6 @@ import { expression } from '../parse.js';
 export const SET = /^([^\s]+?)(?:\s*=[^=]*([^]+))?$/;
 
 /*
-
 	The {% set %} tag allows assignments.
 	It works both as a self-closing tag,
 	or as a paired tag that captures its content
@@ -29,7 +28,7 @@ export default class SetTag extends Tag {
 		};
 	}
 
-	async render(scope, env, children) {
+	async render(scope) {
 		await children(scope);
 		return '';
 	}

@@ -17,7 +17,7 @@ export default class ForTag extends Tag {
 		}
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 
 		let { key, value, collection } = this.args();
 
@@ -41,15 +41,15 @@ export default class ForTag extends Tag {
 		let loop_scope = Object.assign(Object.create(scope), { loop });
 
 		function updateLoop() {
-			loop.index ++;
-			loop.index0 ++;
-			loop.revindex --;
-			loop.revindex0 --;
+			loop.index++;
+			loop.index0++;
+			loop.revindex--;
+			loop.revindex0--;
 			loop.first = loop.index0 === 0;
 			loop.last = loop.index0 === loop.length - 1;
 		}
 
-		let res = '';
+		let res = [];
 
 		// Use for...of loop for compatibility
 		// with any iterable object
@@ -61,10 +61,10 @@ export default class ForTag extends Tag {
 			} else {
 				loop_scope[value] = val;
 			}
-			res += await children(loop_scope);
+			res.push(await children(loop_scope));
 			updateLoop();
 		}
 
-		return res;
+		return res.join('');
 	}
 }

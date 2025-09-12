@@ -11,7 +11,7 @@ export default class IfTag extends Tag {
 		};
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		if (this.tagName === 'if') {
 			let { expression } = this.args();
 			let condition = await expression.call(scope);

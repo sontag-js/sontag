@@ -252,7 +252,7 @@ class Sontag {
 			);
 			return texts.join('');
 		}
-		const res = await $node.render(scope, this, renderChildren);
+		const res = await $node.render(scope, renderChildren, this);
 		return typeof res === 'function' ? res(condition) : res;
 	}
 

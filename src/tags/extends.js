@@ -14,7 +14,7 @@ export default class ExtendsTag extends Tag {
 		};
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		// todo
 	}
 }

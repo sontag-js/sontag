@@ -8,7 +8,7 @@ export default class UseTag extends Tag {
 		// todo
 	}
 
-	async render(scope, env, children) {
+	async render(scope, children, env) {
 		// todo
 	}
 }
