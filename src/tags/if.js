@@ -11,16 +11,21 @@ export default class IfTag extends Tag {
 		};
 	}
 
-	async render(scope, children, env) {
-		if (this.tagName === 'if') {
-			let { expression } = this.args();
-			let condition = await expression.call(scope);
-			return children(scope, condition);
-		} else if (this.tagName === 'elseif') {
-			let { expression } = this.args();
-			return async contition => !contition && await expression.call(scope) ? children(scope) : '';
-		} else if (this.tagName === 'else') {
-			return async condition => !condition ? children(scope) : '';
+	async condition(scope) {
+		// If previous case was matched, don’t match current case
+		if (await this.related?.condition(scope)) {
+			return false;
 		}
+		if (this.tagName === 'else') {
+			return true;
+		}
+		return this.args().expression.call(scope);
+	}
+
+	async render(scope, children) {
+		if (await this.condition(scope)) {
+			return children(scope);
+		}
+		return '';
 	}
 }

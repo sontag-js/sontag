@@ -2,7 +2,7 @@
 
 > __Note:__ Sontag is currently a work-in-progress, check back soon!
 
-A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Liquid](https://shopify.github.io/liquid/), [Jinja](http://jinja.palletsprojects.com/en/2.10.x/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you’re familiar with any of these, you’ll feel right at home with Sontag.
+A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Liquid](https://shopify.github.io/liquid/), [Jinja](https://jinja.palletsprojects.com/en/stable/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you’re familiar with any of these, you’ll feel right at home with Sontag.
 
 ## A note on security
 

@@ -188,26 +188,27 @@ class Sontag {
 						} else {
 							let node = new tag.constructor(tagName, tag.type, signature.trim());
 							if (tag.type === $tag_start) {
+								// Start tag (e.g. `if`)
 								tree.appendChild($head, node);
 								if (!node.singular()) {
 									$head = node;
 								}
 							} else if (tag.type === $tag_end) {
-								let parent = tree.parent($head);
-								if ($head.constructor !== tag.constructor || !parent) {
+								// End tag (e.g. `endif`)
+								const $parent = tree.parent($head);
+								if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
 									throw new Error(`${loc()} Can't close ${$head} with ${node}`);
 								}
-								if ($head.$typeof === $tag_start) {
-									$head = parent;
-								} else if ($head.$typeof === $tag_inside) {
-									$head =  tree.parent(parent);
-								}
+								// Close the tag by pointing upwards
+								$head = $parent;
 							} else if (tag.type === $tag_inside) {
-								let parent = tree.parent($head);
-								if ($head.constructor !== tag.constructor || !parent) {
+								// Inside tag (e.g. `else`, `elseif`)
+								const $parent = tree.parent($head);
+								if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
 									throw new Error(`${loc()} Can't include ${node} in ${$head}`);
 								}
-								tree.appendChild($head, node);
+								node.setRelated($head);
+								tree.appendChild($parent, node);
 								$head = node;
 							}
 						}
@@ -243,17 +244,16 @@ class Sontag {
 	/*
 		Apply the `scope` to the `$node` node of `tree`.
 	*/
-	async apply(tree, $node, scope, condition) {
-		const renderChildren = async (outer_scope, condition) => {
+	async apply(tree, $node, scope) {
+		const renderChildren = async child_scope => {
 			const texts = await Promise.all(
 				tree.childrenToArray($node).map(
-					async $it => await this.apply(tree, $it, outer_scope, condition)
+					async $it => await this.apply(tree, $it, child_scope)
 				)
 			);
 			return texts.join('');
-		}
-		const res = await $node.render(scope, renderChildren, this);
-		return typeof res === 'function' ? res(condition) : res;
+		};
+		return $node.render(scope, renderChildren, this);
 	}
 
 	async render(template, context) {

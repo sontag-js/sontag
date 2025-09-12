@@ -95,6 +95,14 @@ export class Tag extends Node {
 		this.$typeof = type;
 		this.signature = signature;
 		this.parseArgs = memo(this.parseArgs);
+		this.related = null;
+	}
+
+	/*
+		Related tag (e.g. the previous `if` for an `else`)
+	*/
+	setRelated(node) {
+		this.related = node;
 	}
 
 	/*
