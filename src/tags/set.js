@@ -13,7 +13,7 @@ export const SET = /^([^\s]+?)(?:\s*=[^=]*([^]+))?$/;
 	for compatibility with Liquid.
  */
 export default class SetTag extends Tag {
-	static tagNames = ['set', 'assign', 'capture'];
+	static tagNames = ['set'];
 
 	singular() {
 		return this.args().value !== undefined;

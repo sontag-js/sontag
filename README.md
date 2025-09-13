@@ -2,7 +2,7 @@
 
 > __Note:__ Sontag is currently a work-in-progress, check back soon!
 
-A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Liquid](https://shopify.github.io/liquid/), [Jinja](https://jinja.palletsprojects.com/en/stable/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you’re familiar with any of these, you’ll feel right at home with Sontag.
+A just-enough template language in the vein of [Twig](https://twig.symfony.com/), [Jinja](https://jinja.palletsprojects.com/en/stable/), and [Nunjucks](https://mozilla.github.io/nunjucks/). If you’re familiar with any of these, you’ll feel right at home with Sontag.
 
 ## A note on security
 
@@ -147,13 +147,20 @@ The `|` operator is used to pipe values through [filters](#todo). Filters are fu
 
 #### `apply` 
 
-Alias: `filter` (For compatibility with Nunjucks)
+Aliases: `filter`.
 
-#### `block`
+Equivalents: 
 
-> __Open question:__ Does the block use the context in which it’s defined, or the context where it’s imported? (See also the `scoped` attribute).
+* Twig: [apply](https://twig.symfony.com/doc/3.x/tags/apply.html)
+* Jinja: [filter](https://jinja.palletsprojects.com/en/stable/templates/#id11)
+* Nunjucks: [filter](https://mozilla.github.io/nunjucks/templating.html#filter)
 
 #### `call`
+
+Equivalents:
+
+* Jinja: [`call`](https://jinja.palletsprojects.com/en/stable/templates/#call)
+* Nunjucks: [`call`](https://mozilla.github.io/nunjucks/templating.html#call)
 
 #### `embed`
 
@@ -199,6 +206,10 @@ You can pass additional content with the `with` keyword:
 {% endembed %}
 ```
 
+Equivalents:
+
+* Twig: [`embed`](https://twig.symfony.com/doc/3.x/tags/embed.html)
+
 #### `extends`
 
 Extend another template by overriding any `block` it defines:
@@ -232,6 +243,28 @@ Inside a block, you can use [the `parent()` function](#todo) to get the original
 
 The `extends` tag, if present, needs to be the first tag in the template. Any content not included in a block will not get rendered. 
 
+Equivalents:
+
+* Twig: [`extends`](https://twig.symfony.com/doc/3.x/tags/extends.html)
+* Jinja: [`extend`](https://jinja.palletsprojects.com/en/stable/templates/#extends)
+* Nunjucks: [`extends`](https://mozilla.github.io/nunjucks/templating.html#extends)
+
+#### `block`
+
+> __Open question:__ Does the block use the context in which it’s defined, or the context where it’s imported? (See also the `scoped` attribute).
+
+Equivalents:
+
+* Twig: [`block`](https://twig.symfony.com/doc/3.x/tags/block.html)
+* Jinja: [`block`](https://jinja.palletsprojects.com/en/stable/templates/#blocks)
+* Nunjucks: [`block`](https://mozilla.github.io/nunjucks/templating.html#block)
+
+#### `use`
+
+Equivalents:
+
+* Twig: [`use`](https://twig.symfony.com/doc/3.x/tags/use.html)
+
 #### `for`
 
 ```twig
@@ -243,9 +276,19 @@ The `extends` tag, if present, needs to be the first tag in the template. Any co
 {% endfor %}
 ```
 
+Equivalents:
+
+* Twig: [`for`](https://twig.symfony.com/doc/3.x/tags/for.html)
+* Jinja: [`for`](https://jinja.palletsprojects.com/en/stable/templates/#for)
+* Nunjucks: [`for`](https://mozilla.github.io/nunjucks/templating.html#for)
+
 #### `if`
 
-#### `import`
+Equivalents:
+
+* Twig: [`if`](https://twig.symfony.com/doc/3.x/tags/if.html)
+* Jinja: [`if`](https://jinja.palletsprojects.com/en/stable/templates/#if)
+* Nunjucks: [`if`](https://mozilla.github.io/nunjucks/templating.html#if)
 
 #### `include`
 
@@ -270,15 +313,39 @@ See also:
 * the [`include` function](#todo)
 * the [`embed` tag](#todo)
 
+Equivalents:
+
+* Twig: [`include`](https://twig.symfony.com/doc/3.x/tags/include.html)
+* Jinja: [`include`](https://jinja.palletsprojects.com/en/stable/templates/#include)
+* Nunjucks: [`include`](https://mozilla.github.io/nunjucks/templating.html#include)
+
 #### `macro`
+
+Equivalents: 
+
+Twig: [`macro`](https://twig.symfony.com/doc/3.x/tags/macro.html)
+Jinja: [`macro`](https://jinja.palletsprojects.com/en/stable/templates/#macros)
+Nunjucks: [`macro`](https://mozilla.github.io/nunjucks/templating.html#macro)
+
+#### `import` / `from`
+
+Equivalents:
+
+* Twig: [`import`](https://twig.symfony.com/doc/3.x/tags/import.html), [`from`](https://twig.symfony.com/doc/3.x/tags/from.html)
+* Jinja: [`import`](https://jinja.palletsprojects.com/en/stable/templates/#import)
+* Nunjucks: [`import`](https://mozilla.github.io/nunjucks/templating.html#import)
 
 #### `raw`
 
-Alias: `verbatim` (for compatibility with Twig)
+Alias: `verbatim`
+
+Equivalents: 
+
+* Twig: [`verbatim`](https://twig.symfony.com/doc/3.x/tags/verbatim.html)
+* Nunjucks: [`raw`](https://mozilla.github.io/nunjucks/templating.html#raw), [verbatim](https://mozilla.github.io/nunjucks/templating.html#verbatim)
+* Jinja: [`raw`](https://jinja.palletsprojects.com/en/stable/templates/#escaping)
 
 #### `set`
-
-Alias: `capture`, `assign` (for compatibility with Liquid)
 
 Assigns a value to a variable:
 
@@ -292,7 +359,11 @@ It also has a paired version, which assigns the content of the tag to the variab
 {% set month %}August{% endset %}
 ```
 
-#### `use`
+Equivalents:
+
+* Twig: [`set`](https://twig.symfony.com/doc/3.x/tags/set.html)
+* Jinja: [`set`](https://jinja.palletsprojects.com/en/stable/templates/#assignments)
+* Nunjucks: [`set`](https://mozilla.github.io/nunjucks/templating.html#set)
 
 #### `with`
 
@@ -305,6 +376,10 @@ By default we have access to the outer scope inside the `with` tag, but we can l
 The title is: {{ title }}
 {% endwith %}
 ```
+
+Equivalents:
+
+* Twig: [`with`](https://twig.symfony.com/doc/3.x/tags/with.html)
 
 ### Functions
 
