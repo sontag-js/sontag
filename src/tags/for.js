@@ -19,7 +19,9 @@ export default class ForTag extends Tag {
 
 	async render(scope, children, env) {
 
-		let { key, value, collection } = this.args();
+		const forTag = this.tagName === 'else' ? this.related : this;
+
+		let { key, value, collection } = forTag.args();
 
 		let obj = await collection.call(scope);
 		if (key !== undefined) {
@@ -27,44 +29,52 @@ export default class ForTag extends Tag {
 		}
 
 		let len = typeof obj.size === 'function' ? obj.size() : obj.length;
-		let loop = {
-			index: 1,
-			index0: 0,
-			revindex: len - 1,
-			revindex0: len,
-			first: true,
-			last: len === 1,
-			length: len,
-			parent: scope
-		};
 
-		let loop_scope = Object.assign(Object.create(scope), { loop });
+		if (len && this.tagName === 'for') {
 
-		function updateLoop() {
-			loop.index++;
-			loop.index0++;
-			loop.revindex--;
-			loop.revindex0--;
-			loop.first = loop.index0 === 0;
-			loop.last = loop.index0 === loop.length - 1;
-		}
+			let loop = {
+				index: 1,
+				index0: 0,
+				revindex: len - 1,
+				revindex0: len,
+				first: true,
+				last: len === 1,
+				length: len,
+				parent: scope
+			};
 
-		let res = [];
+			let loop_scope = Object.assign(Object.create(scope), { loop });
 
-		// Use for...of loop for compatibility
-		// with any iterable object
-		for (let val of obj) {
-			if (key !== undefined) {
-				// entries
-				loop_scope[key] = val[0];
-				loop_scope[value] = val[1];
-			} else {
-				loop_scope[value] = val;
+			function updateLoop() {
+				loop.index++;
+				loop.index0++;
+				loop.revindex--;
+				loop.revindex0--;
+				loop.first = loop.index0 === 0;
+				loop.last = loop.index0 === loop.length - 1;
 			}
-			res.push(await children(loop_scope));
-			updateLoop();
-		}
 
-		return res.join('');
+			let res = [];
+
+			// Use for...of loop for compatibility
+			// with any iterable object
+			for (let val of obj) {
+				if (key !== undefined) {
+					// entries
+					loop_scope[key] = val[0];
+					loop_scope[value] = val[1];
+				} else {
+					loop_scope[value] = val;
+				}
+				res.push(await children(loop_scope));
+				updateLoop();
+			}
+
+			return res.join('');
+		}
+		if (!len && this.tagName === 'else') {
+			return children(scope);
+		}
+		return '';
 	}
 }

@@ -244,33 +244,41 @@ class Sontag {
 			if (tok.type === 'tag') {
 
 				const [_, tagName, signature] = tok.value.match(TAG_PARTS) ?? [];
-				const tag = this.tag(tagName); 
+				const tags = this.tagsFor(tagName); 
 
-				if (!tag) {
+				if (!tags?.length) {
 					throw new Error(`${loc()} Unknown tag ${tagName}`);
 				}
 
-				let node = new tag.constructor(tagName, tag.type, signature.trim());
+				const tag = tags[0];
+
 				if (tag.type === $tag_start) {
 					// Start tag (e.g. `if`)
+					let node = new tag.constructor(tagName, signature.trim());
 					tree.appendChild($head, node);
 					if (!node.singular()) {
 						$head = node;
 					}
 				} else if (tag.type === $tag_end) {
 					// End tag (e.g. `endif`)
+					let node = new tag.constructor(tagName, signature.trim());
 					const $parent = tree.parent($head);
 					if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
 						throw new Error(`${loc()} Can’t close ${$head} with ${node}`);
 					}
 					// Close the tag by pointing upwards
 					$head = $parent;
-				} else if (tag.type === $tag_inside) {
+				} else {
 					// Inside tag (e.g. `else`, `elseif`)
 					const $parent = tree.parent($head);
-					if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
-						throw new Error(`${loc()} Can’t include ${node} in ${$head}`);
+					if ($head.$typeof === $tag_end || !$parent) {
+						throw new Error(`${loc()} Can’t include ${tagName} in ${$head}`);
 					}
+					const insideTag = tags.find(it => it.constructor === $head.constructor);
+					if (!insideTag) {
+						throw new Error(`${loc()} Can’t include ${tagName} in ${$head}`);
+					}
+					let node = new insideTag.constructor(tagName, signature.trim());
 					node.setRelated($head);
 					tree.appendChild($parent, node);
 					$head = node;
@@ -324,29 +332,29 @@ class Sontag {
 		return this.renderTree(tree, $root, scope);
 	}
 
-	tag(tagName) {
+	tagsFor(tagName) {
 		return this.tags[tagName];
 	}
 
 	addTag(TagClass) {
 		TagClass.tagNames.forEach(tagName => {
-			this.tags[tagName] = {
+			this.tags[tagName] = (this.tags[tagName] || []).concat({
 				constructor: TagClass, 
 				type: $tag_start
-			};
+			});
 			if (!TagClass.singular) {
-				this.tags[`end${tagName}`] = {
+				this.tags[`end${tagName}`] = (this.tags[`end${tagName}`] || []).concat({
 					constructor: TagClass, 
 					type: $tag_end
-				};
+				});
 			}
 		});
 
 		(TagClass.insideTagNames || []).forEach(tagName => {
-			this.tags[tagName] = {
+			this.tags[tagName] = (this.tags[tagName] || []).concat({
 				constructor: TagClass, 
 				type: $tag_inside
-			};
+			});
 		});
 	}
 
