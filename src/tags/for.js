@@ -27,6 +27,7 @@ export default class ForTag extends Tag {
 		}
 
 		let len = typeof obj.size === 'function' ? obj.size() : obj.length;
+
 		let loop = {
 			index: 1,
 			index0: 0,

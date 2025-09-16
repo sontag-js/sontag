@@ -88,11 +88,23 @@ export class Text extends Node {
 	A tag, e.g. {% include 'components/note.son' %}
  */
 export class Tag extends Node {
+
+	static tagNames = [];
+	static insideTagNames = [];
 	
-	constructor(tagName, type, signature) {
+	constructor(tagName, signature) {
 		super();
 		this.tagName = tagName;
-		this.$typeof = type;
+		if (this.constructor.tagNames.indexOf(tagName) > -1) {
+			this.$typeof = $tag_start;
+		} else if (this.constructor.insideTagNames.indexOf(tagName) > -1) {
+			this.$typeof = $tag_inside;
+		} else if (this.constructor.tagNames.indexOf(tagName.replace(/^end/, '')) > -1) {
+			this.$typeof = $tag_end;
+		} else {
+			throw new Error(`Unexpected tag name ${tagName}`);
+		}
+		
 		this.signature = signature;
 		this.parseArgs = memo(this.parseArgs);
 		this.related = null;
