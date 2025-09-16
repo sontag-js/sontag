@@ -125,7 +125,7 @@ class Sontag {
 				}
 				i += 2; // consume end of tag
 
-				if (m = value.match(/^\s*(raw|verbatim)\s*/i)) {
+				if (m = value.match(/^\s*(raw|verbatim)(\s*$|\s+[^]+)/i)) {
 					// Consume plain text until end of verbatim tag
 					
 					// if already in text mode, append to current text token,
@@ -137,7 +137,9 @@ class Sontag {
 						};
 						tokens.push(token);
 					}
-					verbatim = new RegExp(`^{%\\s*end${m[1]}\\s*%}`, 'i');
+					verbatim = m[2]?.trim() ? 
+						new RegExp(`^{%\\s*end${m[1]}\\s+${m[2].trim()}\\s*%}`, 'i') :
+						new RegExp(`^{%\\s*end${m[1]}\\s*%}`, 'i');
 				} else {
 					tokens.push(token = {
 						type: 'tag',
