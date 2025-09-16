@@ -244,16 +244,18 @@ class Sontag {
 	/*
 		Apply the `scope` to the `$node` node of `tree`.
 	*/
-	async apply(tree, $node, scope) {
-		const renderChildren = async child_scope => {
-			const texts = await Promise.all(
-				tree.childrenToArray($node).map(
-					async $it => await this.apply(tree, $it, child_scope)
-				)
-			);
+	async renderTree(tree, $node, scope) {
+		async function renderChildren(inner_scope) {
+			const texts = [];
+			for (let $childNode of tree.childrenToArray($node)) {
+				texts.push(
+					await this.renderTree(tree, $childNode, inner_scope)
+				);
+			}
 			return texts.join('');
 		};
-		return $node.render(scope, renderChildren, this);
+		// TODO: `set`, `macro`, `import`, `from` can bring things into the outer_scope.
+		return $node.render(scope, renderChildren.bind(this), this);
 	}
 
 	async render(template, context) {
@@ -264,7 +266,7 @@ class Sontag {
 	async renderString(contents, context) {
 		let scope = Object.assign(Object.create(this.global_scope), context);
 		let { tree, $root } = this.parse(contents);
-		return this.apply(tree, $root, scope);
+		return this.renderTree(tree, $root, scope);
 	}
 
 	tag(tagName) {
