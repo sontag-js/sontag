@@ -25,12 +25,11 @@ import IfTag from './tags/if.js';
 import ImportTag from './tags/import.js';
 import IncludeTag from './tags/include.js';
 import MacroTag from './tags/macro.js';
-import RawTag from './tags/raw.js';
 import SetTag from './tags/set.js';
 import UseTag from './tags/use.js';
 import WithTag from './tags/with.js';
 
-export const TAG_PARTS = /^\s*([^\s]+)\s*([^]+)$/;
+export const TAG_PARTS = /^\s*([^\s]+)\s*([^]*)$/;
 
 const Tokens = {
 	TSTART: '{%',
@@ -82,10 +81,125 @@ class Sontag {
 		this.addTag(ImportTag);
 		this.addTag(IncludeTag);
 		this.addTag(MacroTag);
-		this.addTag(RawTag);
 		this.addTag(SetTag);
 		this.addTag(UseTag);
 		this.addTag(WithTag);
+	}
+
+	tokenize(str) {
+
+		const chars = Array.from(str.replace(/\f|\r\n?/g, '\n')).map(char => {
+			const c = char.codePointAt(0);
+			if (!c || (c >= 0xd800 && c <= 0xdfff)) {
+				return '\uFFFD';
+			}
+			return char;
+		});
+		const tokens = [];
+		let token;
+		let ch;
+		let i = 0;
+		let m;
+		let verbatim;
+
+		function is_ws(offset = 0) {
+			return (
+				chars[i + offset] === ' ' ||
+				chars[i + offset] === '\n' ||
+				chars[i + offset] === '\t'
+			);
+		}
+
+		while (i < chars.length) {
+
+			// Consume tag
+			if (!verbatim && chars[i] === '{' && chars[i+1] === '%') {
+				i += 2; // consume start of tag
+				let value = '';
+				while (i < chars.length && !(chars[i] === '%' && chars[i+1] === '}')) {
+					value += chars[i];
+					i++;
+				}
+				if (i === chars.length) {
+					throw new Error('Unexpected end of input, unfinished tag');
+				}
+				i += 2; // consume end of tag
+
+				if (m = value.match(/^\s*(raw|verbatim)(\s*$|\s+[^]+)/i)) {
+					// Consume plain text until end of verbatim tag
+					
+					// if already in text mode, append to current text token,
+					// otherwise create a new text token.
+					if (token?.type !== 'text') {
+						token = {
+							type: 'text',
+							value: ''
+						};
+						tokens.push(token);
+					}
+					verbatim = m[2]?.trim() ? 
+						new RegExp(`^{%\\s*end${m[1]}\\s+${m[2].trim()}\\s*%}`, 'i') :
+						new RegExp(`^{%\\s*end${m[1]}\\s*%}`, 'i');
+				} else {
+					tokens.push(token = {
+						type: 'tag',
+						value: value.trim()
+					});
+				}
+				continue;
+			}
+
+			if (verbatim && chars[i] === '{' && chars[i+1] === '%' && (m = chars.slice(i).join('').match(verbatim))) {
+				verbatim = null;
+				i += m[0].length; // consume end of verbatim
+				continue;
+			}
+
+			// Consume comment
+			if (!verbatim && chars[i] === '{' && chars[i+1] === '#') {
+				i += 2; // consume start of comment
+				while (i < chars.length && !(chars[i] === '#' && chars[i+1] === '}')) {
+					i++;
+				}
+				if (i === chars.length) {
+					throw new Error('Unexpected end of input, unfinished comment');
+				}
+				i += 2; // consume end of comment
+				continue;
+			}
+
+			// Consume expression
+			if (!verbatim && chars[i] === '{' && chars[i+1] === '{') {
+				i += 2; // consume start of expression
+				token = {
+					type: 'expression',
+					value: ''
+				};
+				while (i < chars.length && !(chars[i] === '}' && chars[i+1] === '}')) {
+					token.value += chars[i];
+					i++;
+				}
+				if (i === chars.length) {
+					throw new Error('Unexpected end of input, unfinished expression');
+				}
+				token.value = token.value.trim();
+				tokens.push(token);
+				i += 2; // consume end of expression
+				continue;
+			}
+
+			// Consume plain text
+			if (token?.type !== 'text') {
+				token = {
+					type: 'text',
+					value: ''
+				};
+				tokens.push(token);
+			}
+			token.value += chars[i];
+			i++;
+		}
+		return tokens;
 	}
 
 	parse(contents, f = '(String)') {
@@ -93,14 +207,9 @@ class Sontag {
 		// Basic error logging
 		let line = 1, line_count = 0, loc = () => `[${f}:${line - line_count}]`;
 
-		/* 
-			Split the input by relevant tokens.
-		*/
-		let regex = new RegExp(`(${Object.values(Tokens).join('|')})`, 'g');
-		let tokens = contents.split(regex);
+		let tokens = this.tokenize(contents);
 		let tok;
-		let rawmode = false;
-
+		
 		/*
 			The AST tree
 		 */
@@ -123,112 +232,58 @@ class Sontag {
 
 			tok = tokens.shift();
 
-			line_count = (tok.match(/\n/g) || []).length;
-			line += line_count;
-
-			// Consume a comment
-
-			if (!rawmode && tok === Tokens.CSTART) {
-				while (tokens.length && tokens[0] !== Tokens.CEND) {
-					tok = tokens.shift();
-				}
-				if (!tokens.length) {
-					throw new Error(`${loc()} Unterminated comment`);
-				}
-				tok = tokens.shift(); // consume CEND
-				continue;
-			}
-
 			// Consume an expression
 
-			if (!rawmode && tok === Tokens.ESTART) {
-				while (tokens.length && tokens[0] !== Tokens.EEND) {
-					tok = tokens.shift();
-					tree.appendChild($head, new Expression(tok));
-				}
-				if (!tokens.length) {
-					throw new Error(`${loc()} Unterminated expression`);
-				}
-				tok = tokens.shift(); // consume EEND
+			if (tok.type === 'expression') {
+				tree.appendChild($head, new Expression(tok.value));
 				continue;
 			}
 
 			// Consume a tag
 
-			if (tok === Tokens.TSTART) {
+			if (tok.type === 'tag') {
 
-				let start_node = new Text(tok);
-				if (rawmode) {
-					tree.appendChild($head, start_node);
+				const [_, tagName, signature] = tok.value.match(TAG_PARTS) ?? [];
+				const tag = this.tag(tagName); 
+
+				if (!tag) {
+					throw new Error(`${loc()} Unknown tag ${tagName}`);
 				}
 
-				while (tokens.length && tokens[0] !== Tokens.TEND) {
-					tok = tokens.shift();
-					const [_, tagName, signature] = tok.match(TAG_PARTS) ?? [];
-					const tag = this.tag(tagName); 
-
-					if (rawmode) {
-						if (tag?.constructor.raw && tag?.type === $tag_end) {
-							tree.remove(start_node);
-							rawmode = false;
-						} else {
-							// consume tag as plain text
-							tree.appendChild($head, new Text(tok));
-						}
-					} else {
-
-						if (!tag) {
-							throw new Error(`${loc()} Unknown tag ${tagName}`);
-						}
-
-						if (tag.constructor.raw && tag.type === $tag_start) {
-							rawmode = true;
-							// consume TEND so it doesn’t get appended as plain text
-							tok = tokens.shift();
-						} else {
-							let node = new tag.constructor(tagName, tag.type, signature.trim());
-							if (tag.type === $tag_start) {
-								// Start tag (e.g. `if`)
-								tree.appendChild($head, node);
-								if (!node.singular()) {
-									$head = node;
-								}
-							} else if (tag.type === $tag_end) {
-								// End tag (e.g. `endif`)
-								const $parent = tree.parent($head);
-								if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
-									throw new Error(`${loc()} Can't close ${$head} with ${node}`);
-								}
-								// Close the tag by pointing upwards
-								$head = $parent;
-							} else if (tag.type === $tag_inside) {
-								// Inside tag (e.g. `else`, `elseif`)
-								const $parent = tree.parent($head);
-								if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
-									throw new Error(`${loc()} Can't include ${node} in ${$head}`);
-								}
-								node.setRelated($head);
-								tree.appendChild($parent, node);
-								$head = node;
-							}
-						}
+				let node = new tag.constructor(tagName, tag.type, signature.trim());
+				if (tag.type === $tag_start) {
+					// Start tag (e.g. `if`)
+					tree.appendChild($head, node);
+					if (!node.singular()) {
+						$head = node;
 					}
-				}
-				if (tokens.length) {
-					// consume TEND
-					tok = tokens.shift();
-					if (rawmode) {
-						tree.appendChild($head, new Text(tok));
+				} else if (tag.type === $tag_end) {
+					// End tag (e.g. `endif`)
+					const $parent = tree.parent($head);
+					if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
+						throw new Error(`${loc()} Can’t close ${$head} with ${node}`);
 					}
-				} else if (!rawmode) {
-					throw new Error(`${loc()} Unterminated tag`);
+					// Close the tag by pointing upwards
+					$head = $parent;
+				} else if (tag.type === $tag_inside) {
+					// Inside tag (e.g. `else`, `elseif`)
+					const $parent = tree.parent($head);
+					if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
+						throw new Error(`${loc()} Can’t include ${node} in ${$head}`);
+					}
+					node.setRelated($head);
+					tree.appendChild($parent, node);
+					$head = node;
 				}
 				continue;
 			}
 
-			// Consume static content
+			if (tok.type === 'text') {
+				tree.appendChild($head, new Text(tok.value));
+				continue;
+			}
 
-			tree.appendChild($head, new Text(tok));
+			throw new Error(`Unexpected token type ${tok.type}`);
 		};
 
 		if ($head !== $root) {
