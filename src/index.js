@@ -1,6 +1,6 @@
 import SymbolTree from 'symbol-tree';
-import { Root, Text, Expression, $tag_start, $tag_end, $tag_inside } from './node-types.js';
-import fsLoader from './fs.js';
+import { Root, Text, Expression } from './node.js';
+import fsLoader from './loaders/fs.js';
 
 // Functions
 import BlockFunction from './functions/block.js';
@@ -252,18 +252,18 @@ class Sontag {
 
 				const tag = tags[0];
 
-				if (tag.type === $tag_start) {
+				if (tag.type === 'start') {
 					// Start tag (e.g. `if`)
 					let node = new tag.constructor(tagName, signature.trim());
 					tree.appendChild($head, node);
 					if (!node.singular()) {
 						$head = node;
 					}
-				} else if (tag.type === $tag_end) {
+				} else if (tag.type === 'end') {
 					// End tag (e.g. `endif`)
 					let node = new tag.constructor(tagName, signature.trim());
 					const $parent = tree.parent($head);
-					if ($head.constructor !== tag.constructor || $head.$typeof === $tag_end || !$parent) {
+					if ($head.constructor !== tag.constructor || $head.type === 'end' || !$parent) {
 						throw new Error(`${loc()} Can’t close ${$head} with ${node}`);
 					}
 					// Close the tag by pointing upwards
@@ -271,7 +271,7 @@ class Sontag {
 				} else {
 					// Inside tag (e.g. `else`, `elseif`)
 					const $parent = tree.parent($head);
-					if ($head.$typeof === $tag_end || !$parent) {
+					if ($head.type === 'end' || !$parent) {
 						throw new Error(`${loc()} Can’t include ${tagName} in ${$head}`);
 					}
 					const insideTag = tags.find(it => it.constructor === $head.constructor);
@@ -340,12 +340,12 @@ class Sontag {
 		TagClass.tagNames.forEach(tagName => {
 			this.tags[tagName] = (this.tags[tagName] || []).concat({
 				constructor: TagClass, 
-				type: $tag_start
+				type: 'start'
 			});
 			if (!TagClass.singular) {
 				this.tags[`end${tagName}`] = (this.tags[`end${tagName}`] || []).concat({
 					constructor: TagClass, 
-					type: $tag_end
+					type: 'end'
 				});
 			}
 		});
@@ -353,7 +353,7 @@ class Sontag {
 		(TagClass.insideTagNames || []).forEach(tagName => {
 			this.tags[tagName] = (this.tags[tagName] || []).concat({
 				constructor: TagClass, 
-				type: $tag_inside
+				type: 'inside'
 			});
 		});
 	}
@@ -364,4 +364,4 @@ class Sontag {
 }
 
 export default Sontag;
-export * as types from './node-types.js';
+export * as types from './node.js';

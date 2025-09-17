@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import test from 'node:test';
-import load from '../src/fs.js';
+import load from '../src/loaders/fs.js';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 

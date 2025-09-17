@@ -1,4 +1,4 @@
-import { Tag } from '../node-types.js';
+import { Tag } from '../node.js';
 import { expression } from '../parse.js';
 
 export default class IfTag extends Tag {

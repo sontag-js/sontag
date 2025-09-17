@@ -96,11 +96,11 @@ export class Tag extends Node {
 		super();
 		this.tagName = tagName;
 		if (this.constructor.tagNames.indexOf(tagName) > -1) {
-			this.$typeof = $tag_start;
+			this.type = 'start';
 		} else if (this.constructor.insideTagNames.indexOf(tagName) > -1) {
-			this.$typeof = $tag_inside;
+			this.type = 'inside';
 		} else if (this.constructor.tagNames.indexOf(tagName.replace(/^end/, '')) > -1) {
-			this.$typeof = $tag_end;
+			this.type = 'end';
 		} else {
 			throw new Error(`Unexpected tag name ${tagName}`);
 		}
@@ -152,11 +152,3 @@ export class Tag extends Node {
 		return this.constructor.singular;
 	}
 };
-
-/*
-	Symbols to distinguish opening from closing tags
-	in paired tags, e.g. `block` vs. `endblock`
- */
-export const $tag_start = Symbol('tag/start');
-export const $tag_inside = Symbol('tag/inside');
-export const $tag_end = Symbol('tag/end');
