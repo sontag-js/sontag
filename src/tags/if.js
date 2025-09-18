@@ -24,7 +24,7 @@ export default class IfTag extends Tag {
 
 	async render(scope, children) {
 		if (await this.condition(scope)) {
-			return children(scope);
+			return children(Object.create(scope));
 		}
 		return '';
 	}

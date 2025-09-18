@@ -10,7 +10,7 @@ let fixtures = globSync('*/*.html', { cwd, exclude: ['*/_*.html'] });
 let env = new Sontag(cwd);
 
 // strip trailing newlines
-const trim = str => str.replace(/(^\n*|\n$)/g, '');
+const trim = str => str?.replace(/(^\n*|\n$)/g, '') ?? '';
 
 fixtures.forEach(template => {
 	test(template, { 
