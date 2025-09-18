@@ -63,7 +63,7 @@ class Sontag {
 			source: SourceFunction.bind(this),
 
 			//  Built-in filters
-			__filters__: {
+			[Symbol.for('sontag/filters')]: {
 				batch: BatchFilter.bind(this),
 				default: DefaultFilter.bind(this)
 			}
@@ -359,7 +359,7 @@ class Sontag {
 	}
 
 	addFilter(name, fn) {
-		this.global_scope.__filters__[name] = fn;
+		this.global_scope[Symbol.for('sontag/filters')][name] = fn;
 	}
 }
 

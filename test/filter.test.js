@@ -5,7 +5,7 @@ import test from 'node:test';
 test('filters', async t => {
 	
 	let ctx = {
-		__filters__: {
+		[Symbol.for('sontag/filters')]: {
 			lowercase: str => str.toLowerCase(),
 			add: (increment, more, no = 7) => no + more + increment,
 			async_add: async (increment, no) => no + increment,

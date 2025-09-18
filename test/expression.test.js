@@ -19,7 +19,7 @@ let tests = {
 	'{ class: "my-class", for: "my-input" }': 'return {\n  class: "my-class",\n  for: "my-input"\n}',
 
 	// Special operators
-	'a..z': 'return this.__filters__.range(this.a, this.z)',
+	'a..z': 'return this[Symbol.for("sontag/filters")].range(this.a, this.z)',
 	'1 // 2': 'return Math.trunc(1 / 2)',
 
 	// Operators
