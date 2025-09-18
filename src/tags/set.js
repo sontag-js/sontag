@@ -34,7 +34,6 @@ export default class SetTag extends Tag {
 	}
 
 	async render(scope, children) {
-		await children(Object.create(scope));
 		return '';
 	}
 

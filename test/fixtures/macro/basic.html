@@ -1,0 +1,12 @@
+{% macro hello(who = 'world', suffix = 10) %}
+Hello, {{who}}{{suffix}}
+{% endmacro %}
+{{ hello('Dan') }}
+{{ hello() }}
+---
+{}
+---
+Hello, Dan10
+
+
+Hello, world10
