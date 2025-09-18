@@ -73,7 +73,7 @@ export default class ForTag extends Tag {
 			return res.join('');
 		}
 		if (!len && this.tagName === 'else') {
-			return children(scope);
+			return children(Object.create(scope));
 		}
 		return '';
 	}

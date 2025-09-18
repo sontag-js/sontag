@@ -19,3 +19,14 @@ export function expression(str) {
 		`return ${ parseExpression(str, { async: true }) }`
 	);
 }
+
+/*
+	Regular expression from: 
+	https://github.com/tc39/proposal-regexp-unicode-property-escapes
+*/
+
+const IDENTIFIER_REGEX = /[$_\p{ID_Start}][$\u200C\u200D\p{ID_Continue}]*/u;
+
+export function identifier(str) {
+	return str?.trim().match(IDENTIFIER_REGEX)?.[0] ?? null;
+}

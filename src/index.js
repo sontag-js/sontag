@@ -327,7 +327,7 @@ class Sontag {
 		Apply the `scope` to the `$node` node of `tree`.
 	*/
 	async renderTree(tree, $node, scope) {
-		async function renderChildren(inner_scope) {
+		const renderChildren = async (inner_scope) => {
 			const texts = [];
 			for (let $childNode of tree.childrenToArray($node)) {
 				texts.push(
@@ -337,7 +337,15 @@ class Sontag {
 			return texts.join('');
 		};
 		// TODO: `set`, `macro`, `import`, `from` can bring things into the outer_scope.
-		return $node.render(scope, renderChildren.bind(this), this);
+		if ($node.bindings) {
+			Object.assign(
+				scope,
+				await $node.bindings(scope, renderChildren, this)
+			);
+		}
+
+		const result = $node.render(scope, renderChildren, this);
+		return result;
 	}
 
 	async render(template, context) {

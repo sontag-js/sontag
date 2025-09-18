@@ -1,0 +1,18 @@
+{% set val = 'outside' %}
+{% for i in [1, 2, 3] %}
+{% set val = i %}
+{{ val }}
+{% endfor %}
+{{ val }}
+---
+{}
+---
+1
+
+
+2
+
+
+3
+
+outside
