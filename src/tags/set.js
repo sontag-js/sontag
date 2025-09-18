@@ -1,7 +1,8 @@
 import { Tag } from '../node.js';
 import { expression } from '../parse.js';
 
-export const SET = /^([^\s]+?)(?:\s*=[^=]*([^]+))?$/;
+// TODO more sophisticated regex
+export const SET = /^([a-z0-9_]+)(?:\s*=([^]+))?$/i;
 
 /*
 	The {% set %} tag allows assignments.
@@ -21,14 +22,16 @@ export default class SetTag extends Tag {
 
 	parseArgs(signature) {
 		let res = signature.match(SET); // => [str, identifier, expression]
-		if (!res) throw new Error(`${this}: Syntax error`);
+		if (!res) {
+			throw new Error(`${this}: Syntax error`);
+		}
 		return {
 			identifier: res[1],
 			value: res[2] ? expression(res[2]) : undefined
 		};
 	}
 
-	async render(scope) {
+	async render(scope, children) {
 		await children(scope);
 		return '';
 	}

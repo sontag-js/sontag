@@ -1,5 +1,5 @@
 Hello {{ Math.floor(5.17) }} 
-{{ Number.isFinite(Infinity) }}
+{{ -Infinity ~ Number.isFinite(Infinity).toString() }}
 {{ Number.isNaN(NaN) }}
 {{ JSON.stringify({
 	hello: {
@@ -16,7 +16,7 @@ Hello {{ Math.floor(5.17) }}
 }
 ---
 Hello 5 
-false
+-Infinityfalse
 true
 {"hello":{"world":true}}
 
