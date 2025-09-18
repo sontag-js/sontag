@@ -1,6 +1,7 @@
-import { expression } from '../src/parse.js';
 import assert from 'node:assert';
 import test from 'node:test';
+
+import { expression } from '../src/parse.js';
 
 test('filters', async t => {
 	

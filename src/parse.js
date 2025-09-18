@@ -1,4 +1,4 @@
-import { parseExpression } from 'acorn-sontag';
+import { parseExpression, parseFunctionSignature } from 'acorn-sontag';
 
 /* 
 	Parses a Sontag-flavored expression 
@@ -19,6 +19,10 @@ export function expression(str) {
 		`return ${ parseExpression(str, { async: true }) }`
 	);
 }
+
+export function func(str) {
+	return parseFunctionSignature(str, { async: true });
+};
 
 /*
 	Regular expression from: 
