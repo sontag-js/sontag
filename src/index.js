@@ -62,7 +62,26 @@ class Sontag {
 			super: SuperFunction.bind(this),
 			source: SourceFunction.bind(this),
 
-			//  Built-in filters
+			/* 
+				Standard built-in objects
+				See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects 
+			*/
+			Infinity,
+			NaN,
+			undefined,
+   			Number,
+   			BigInt,
+   			Math,
+   			Date,
+   			Intl,
+   			JSON,
+
+   			/*
+   				Host objects
+   			*/
+   			URL,
+
+			// Built-in filters
 			[Symbol.for('sontag/filters')]: {
 				batch: BatchFilter.bind(this),
 				default: DefaultFilter.bind(this)

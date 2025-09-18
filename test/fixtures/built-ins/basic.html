@@ -1,0 +1,24 @@
+Hello {{ Math.floor(5.17) }} 
+{{ Number.isFinite(Infinity) }}
+{{ Number.isNaN(NaN) }}
+{{ JSON.stringify({
+	hello: {
+		world: true
+	}
+}) }}
+
+{{ new Intl.DateTimeFormat('en').format(new Date(timestamp)) }}
+{{ URL.canParse(homepage) }}
+---
+{
+	timestamp: 1758210481192,
+	homepage: 'https://example.com'
+}
+---
+Hello 5 
+false
+true
+{"hello":{"world":true}}
+
+9/18/2025
+true
