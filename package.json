@@ -4,9 +4,10 @@
   "description": "A just-enough template language.",
   "type": "module",
   "main": "src/index.js",
+  "repository": "git@github.com:sontag-js/sontag.git",
   "license": "MIT",
   "dependencies": {
-    "acorn-sontag": "^0.6.0",
+    "acorn-sontag": "^0.8.0",
     "memoize-one": "^6.0.0",
     "symbol-tree": "^3.2.4"
   },
