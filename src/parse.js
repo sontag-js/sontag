@@ -23,8 +23,9 @@ export function expression(str) {
 	return wrapAwait(parseExpression(str, { async: true }));
 }
 
-export function wrapAwait(str) {
+export function wrapAwait(str, ...args) {
 	return new AsyncFunction(
+		...args,
 		`return ${ str }`
 	);
 }

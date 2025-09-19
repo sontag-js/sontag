@@ -18,13 +18,13 @@ export default class MacroTag extends Tag {
 	async bindings(scope, children, env) {
 		let { name, params } = this.args();
 		return {
-			[name]: async function() {
+			[name]: async function(...args) {
 
 				const inner_scope = {};
 				for (let idx = 0; idx < params.length; idx++) {
 					let param = params[idx];
-					if (arguments[idx] !== undefined) {
-						inner_scope[param.name] = arguments[idx];
+					if (args[idx] !== undefined) {
+						inner_scope[param.name] = args[idx];
 					} else if (param.value !== undefined) {
 						inner_scope[param.name] = await expression(param.value).call(scope);
 					}
@@ -32,7 +32,10 @@ export default class MacroTag extends Tag {
 
 				const function_scope = Object.assign(
 					Object.create(scope),
-					inner_scope
+					inner_scope,
+					typeof this.caller === 'function' ? {
+						caller: this.caller
+					} : undefined
 				);
 				return await children(function_scope);
 			}

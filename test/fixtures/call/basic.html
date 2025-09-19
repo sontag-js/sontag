@@ -1,0 +1,11 @@
+{% macro hello(who = 'world', suffix = 10) %}
+Hello, {{who}}{{suffix}} {{caller()}}
+{% endmacro %}
+{% call hello() %}
+Blah
+{% endcall %}
+---
+{}
+---
+Hello, world10 
+Blah
