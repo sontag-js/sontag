@@ -1,34 +1,72 @@
 import { Tag } from '../node.js';
-import { expression } from '../parse.js';
+import { identifier } from '../parse.js';
 
 const BLOCK = /^([^\s]+)(?:\s+([^]+))?$/;
+
+/*
+
+	Block
+	-----
+
+	Syntax:
+
+		{% block <identifier> scoped? required? %}
+
+		{% endblock <identifier>? %}
+
+*/
 
 export default class BlockTag extends Tag {
 	static tagNames = ['block'];
 
 	parseArgs(signature) {
-		let res = signature.match(BLOCK);
-		// => [str, name, expression] 
-		if (!res) throw new Error(`${this}: Syntax error`);
-		return {
-			name: expression(`"${res[1]}"`)(),
-			expression: res[2] ? expression(res[2]) : undefined
+		const items = signature.split(/\s+/).filter(Boolean);
+		const name = items.shift();
+		if (!identifier(name)) {
+			throw new Error('Expected block name');
+		}
+		const ret = { 
+			name,
+			scoped: false,
+			required: false
 		};
+		items.forEach(it => {
+			if (it === 'scoped') {
+				ret.scoped = true;
+			} else if (it === 'required') {
+				ret.required = true;
+			} else {
+				throw new Error(`Unexpected block attribute: ${it}`);
+			}
+		});
+		return ret;
 	}
 
 	async render(scope, children, env) {
+		/*
+			todo:
+
+			if (is_extending) {
+				return '';
+			}
+			return await children(scope);
+		*/
 		return '';
 	}
 
-	async slots(scope) {
+	async blocks(scope, children, env) {
+		// todo: scoped, required
+		const { name, scoped, required } = this.args();
+		const context = Object.assign(
+			Object.create(scope),
+			{ 
+				super: async () => {
+					// todo
+				}
+			}
+		);
 		return {
-			[this.args().name]: this.args().expression ?
-				this.args().expression.call(scope) : 
-				await children(scope)
+			[name]: await children(context)
 		};
-	}
-
-	singular() {
-		return this.args().expression !== undefined;
 	}
 }
