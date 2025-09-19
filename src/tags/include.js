@@ -1,8 +1,6 @@
 import { Tag } from '../node.js';
-import { expression, expressions, wrapAwait } from '../parse.js';
+import { expressions, wrapAwait } from '../parse.js';
 import { flattenPrototypes } from '../util.js';
-
-export const INCLUDE = /^([^]+?)(\s+ignore\s+missing)?(?:\s+with\s+([^]+?))?(\s+only)?$/;
 
 /*
 	Include a template.

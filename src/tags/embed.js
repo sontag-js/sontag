@@ -1,20 +1,16 @@
-import { Tag } from '../node.js';
+import IncludeTag from './include.js';
 import { expression } from '../parse.js';
 
 /*
 	Include a template with blocks to override 
 	parts of its content.
  */
-export default class EmbedTag extends Tag {
+export default class EmbedTag extends IncludeTag {
 	static tagNames = ['embed'];
+	static singular = false;
 
-	parseArgs(signature) {
-		return {
-			template: expression(signature)
-		}
-	}
-
-	async render() {
-		// todo
+	// todo
+	async render(scope, children, env) {
+		
 	}
 }
