@@ -12,7 +12,6 @@ import SourceFunction from './functions/source.js';
 
 // Filters
 import BatchFilter from './filters/batch.js';
-import DefaultFilter from './filters/default.js';
 
 // Tags
 import ApplyTag from './tags/apply.js';
@@ -70,7 +69,6 @@ class Sontag {
 			NaN,
 			undefined,
    			Number,
-   			BigInt,
    			Math,
    			Date,
    			Intl,
@@ -83,8 +81,7 @@ class Sontag {
 
 			// Built-in filters
 			[Symbol.for('sontag/filters')]: {
-				batch: BatchFilter.bind(this),
-				default: DefaultFilter.bind(this)
+				batch: BatchFilter.bind(this)
 			}
 		};
 
