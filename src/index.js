@@ -334,7 +334,7 @@ class Sontag {
 			}
 			return texts.join('');
 		};
-		// TODO: `set`, `macro`, `import`, `from` can bring things into the outer_scope.
+
 		if ($node.bindings) {
 			Object.assign(
 				scope,
@@ -344,6 +344,45 @@ class Sontag {
 
 		const result = $node.render(scope, renderChildren, this);
 		return result;
+	}
+
+	/*	
+		
+	*/
+	async import(source, context) {
+		let contents = await this.options.loader(source, this.cwd);
+		if (contents === null) {
+			throw new Error(`Couldn’t find: ${source}`);
+		}
+		let { tree, $root } = this.parse(contents);
+		const exports = {};
+
+		const children = tree.childrenToArray($root);
+
+		let scope = Object.assign(Object.create(this.global_scope), context);
+		
+		for (let i = 0; i < children.length; i++) {
+			const $node = children[i];
+			const renderChildren = async (inner_scope) => {
+				const texts = [];
+				for (let $childNode of tree.childrenToArray($node)) {
+					texts.push(
+						await this.renderTree(tree, $childNode, inner_scope)
+					);
+				}
+				return texts.join('');
+			};
+
+			if ($node.bindings) {
+				const bindings = await $node.bindings(scope, renderChildren, this);
+				Object.assign(exports, bindings);
+				Object.assign(scope, bindings);
+			}
+		}
+
+		return Object.fromEntries(
+			Object.entries(exports).filter(entry => entry[0][0] !== '_')
+		);
 	}
 
 	async render(candidates, context) {
