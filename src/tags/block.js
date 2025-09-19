@@ -43,15 +43,19 @@ export default class BlockTag extends Tag {
 	}
 
 	async render(scope, children, env) {
-		/*
-			todo:
-
-			if (is_extending) {
-				return '';
+		const { name, scoped, required } = this.args();
+		const inner_scope = Object.assign(
+			Object.create(scope),
+			{
+				[Symbol.for('sontag/extends')]: false
 			}
-			return await children(scope);
-		*/
-		return '';
+		);
+		const own_content = await children(inner_scope);
+		if (scope[Symbol.for('sontag/extends')]) {
+			return { name, scoped, required, content: own_content };
+		}
+		const content = scope[Symbol.for('sontag/blocks')]?.find(it => it.name === name)?.content;
+		return content ?? own_content;
 	}
 
 	async blocks(scope, children, env) {

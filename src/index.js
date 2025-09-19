@@ -319,12 +319,19 @@ class Sontag {
 	async renderTree(tree, $node, scope) {
 		const renderChildren = async (inner_scope) => {
 			const texts = [];
+			const blocks = [];
+			const is_extending = inner_scope[Symbol.for('sontag/extends')];
 			for (let $childNode of tree.childrenToArray($node)) {
-				texts.push(
-					await this.renderTree(tree, $childNode, inner_scope)
-				);
+				const text = await this.renderTree(tree, $childNode, inner_scope);
+				if (is_extending) {
+					if (typeof text === 'object') {
+						blocks.push(text);
+					}
+				} else {
+					texts.push(text);
+				}
 			}
-			return texts.join('');
+			return is_extending ? blocks : texts.join('');
 		};
 
 		if ($node.bindings) {

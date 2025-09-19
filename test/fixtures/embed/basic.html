@@ -1,0 +1,23 @@
+{% embed 'embed/components/note.html' %}
+	{% block title %}Note title{% endblock %}
+	{% block body%}Note body{% endblock %}
+{% endembed %}
+{% embed 'embed/components/note.html' %}
+{% endembed %}
+{% embed 'embed/components/note.html' with { title: "My title" } %}
+{% endembed %}
+---
+{}
+---
+<div class='note'>
+<h1>Note title</h1>
+<p>Note body</p>
+</div>
+<div class='note'>
+<h1>Placeholder title</h1>
+<p>Placeholder body</p>
+</div>
+<div class='note'>
+<h1>Placeholder titleMy title</h1>
+<p>Placeholder body</p>
+</div>

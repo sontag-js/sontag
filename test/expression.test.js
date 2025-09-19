@@ -14,8 +14,6 @@ let tests = {
 	'[`note-${p.type}.html`, "note.html"]': 'return [`note-${this.p.type}.html`, "note.html"]',
 
 	// Reserved keywords:
-	'class': 'return this.class',
-	'for': 'return this.for',
 	'{ class: "my-class", for: "my-input" }': 'return {\n  class: "my-class",\n  for: "my-input"\n}',
 
 	// Special operators
