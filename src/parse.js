@@ -1,4 +1,4 @@
-import { parseExpression, parseFunctionSignature } from 'acorn-sontag';
+import { parseExpression, parseExpressions, parseFunctionSignature } from 'acorn-sontag';
 
 /* 
 	Parses a Sontag-flavored expression 
@@ -15,14 +15,22 @@ let AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 	The function then needs to be call()-ed with a certain scope.
  */
 export function expression(str) {
+	return wrapAwait(parseExpression(str, { async: true }));
+}
+
+export function wrapAwait(str) {
 	return new AsyncFunction(
-		`return ${ parseExpression(str, { async: true }) }`
+		`return ${ str }`
 	);
 }
 
 export function func(str) {
 	return parseFunctionSignature(str, { async: true });
 };
+
+export function expressions(str) {
+	return parseExpressions(str, { async: true });
+}
 
 /*
 	Regular expression from: 

@@ -18,6 +18,7 @@ export default class WithTag extends Tag {
 
 	async render(scope, children, env) {
 		let { own_scope, only } = this.args();
+
 		let inner_scope = Object.assign(
 			Object.create(only ? env.global_scope : scope),
 			own_scope === undefined ? {} : await own_scope.call(scope)

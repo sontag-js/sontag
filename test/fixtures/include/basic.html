@@ -1,12 +1,22 @@
+{% set outside = 'outside' %}
 {% 
 	include 'include/components/note.html' with { 
 		content: 'Hello',
 		class: 'note--variant'
-	} 
+	}
+%}
+{% 
+	include 'include/components/note.html' with { 
+		content: 'Hello',
+		class: 'note--variant'
+	} only
 %}
 ---
 {}
 ---
 <div class='note note--variant'>
-	Hello
+	Hello outside
+</div>
+<div class='note note--variant'>
+	Hello 
 </div>

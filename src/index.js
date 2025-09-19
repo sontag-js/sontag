@@ -52,38 +52,41 @@ class Sontag {
 		/*
 			Default scope
 		 */
-		this.global_scope = {
-			// Built-in functions	
-			block: BlockFunction.bind(this),
-			dump: DumpFunction.bind(this),
-			include: IncludeFunction.bind(this),
-			parent: ParentFunction.bind(this),
-			super: SuperFunction.bind(this),
-			source: SourceFunction.bind(this),
+		this.global_scope = Object.assign(
+			Object.create(null),
+			{
+				// Built-in functions	
+				block: BlockFunction.bind(this),
+				dump: DumpFunction.bind(this),
+				include: IncludeFunction.bind(this),
+				parent: ParentFunction.bind(this),
+				super: SuperFunction.bind(this),
+				source: SourceFunction.bind(this),
 
-			/* 
-				Standard built-in objects
-				See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects 
-			*/
-			Infinity,
-			NaN,
-			undefined,
-   			Number,
-   			Math,
-   			Date,
-   			Intl,
-   			JSON,
+				/* 
+					Standard built-in objects
+					See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects 
+				*/
+				Infinity,
+				NaN,
+				undefined,
+	   			Number,
+	   			Math,
+	   			Date,
+	   			Intl,
+	   			JSON,
 
-   			/*
-   				Host objects
-   			*/
-   			URL,
+	   			/*
+	   				Host objects
+	   			*/
+	   			URL,
 
-			// Built-in filters
-			[Symbol.for('sontag/filters')]: {
-				batch: BatchFilter.bind(this)
+				// Built-in filters
+				[Symbol.for('sontag/filters')]: {
+					batch: BatchFilter.bind(this)
+				}
 			}
-		};
+		);
 
 		// Built-in tags
 		this.tags = {};
