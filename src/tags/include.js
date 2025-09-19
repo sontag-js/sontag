@@ -54,6 +54,11 @@ export default class IncludeTag extends Tag {
 			we must flatten the prototype chain into a simple object.
 		*/
 		const context = flattenPrototypes(inner_scope, env.global_scope);
-		return env.render(await template.call(scope), context, ignore_missing);
+		const candidates = await template.call(scope);
+		const ret = await env.render(candidates, context);
+		if (ret === null && !ignore_missing) {
+			throw new Error(`Can’t find any of: ${ candidates }`);
+		}
+		return ret ?? '';
 	}
 }

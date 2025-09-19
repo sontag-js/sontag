@@ -2,7 +2,18 @@ import { Tag } from '../node.js';
 import { expression } from '../parse.js';
 
 /*
-	Extend a template.
+	Extends
+	-------
+
+	Syntax:
+
+		{% extend <expression> %}
+
+	Usage notes:
+		
+		Must be first tag present in the template.
+		Any content before template is printed literally.
+
  */
 export default class ExtendsTag extends Tag {
 	static tagNames = ['extends'];

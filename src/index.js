@@ -5,7 +5,6 @@ import fsLoader from './loaders/fs.js';
 // Functions
 import BlockFunction from './functions/block.js';
 import DumpFunction from './functions/dump.js';
-import IncludeFunction from './functions/include.js';
 import ParentFunction from './functions/parent.js';
 import SuperFunction from './functions/parent.js';
 import SourceFunction from './functions/source.js';
@@ -58,7 +57,6 @@ class Sontag {
 				// Built-in functions	
 				block: BlockFunction.bind(this),
 				dump: DumpFunction.bind(this),
-				include: IncludeFunction.bind(this),
 				parent: ParentFunction.bind(this),
 				super: SuperFunction.bind(this),
 				source: SourceFunction.bind(this),
@@ -348,8 +346,11 @@ class Sontag {
 		return result;
 	}
 
-	async render(template, context) {
-		let contents = await this.options.loader(template, this.cwd);
+	async render(candidates, context) {
+		let contents = await this.options.loader(candidates, this.cwd);
+		if (contents === null) {
+			return null;
+		}
 		return this.renderString(contents, context);
 	}
 

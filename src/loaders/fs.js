@@ -26,5 +26,5 @@ export default async function load(candidates, cwd) {
 		}
 	}
 
-	throw new Error(`Can't find anything for ${candidates.join(', ')}`);
+	return null;
 };
