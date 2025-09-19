@@ -1,0 +1,11 @@
+{% macro alert(msg = '') %}
+<div class='alert'>Alert: {{msg}}</div>
+{% endmacro %}
+
+{% set outside = 'outside' %}
+{% if true %}
+	{% set inside = 'inside' %}
+{% endif %}
+
+{% set _private = 'private' %}
+{% set pub %}{{ _private }}{% endset %}

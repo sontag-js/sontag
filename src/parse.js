@@ -1,4 +1,9 @@
-import { parseExpression, parseExpressions, parseFunctionSignature } from 'acorn-sontag';
+import { 
+	parseExpression, 
+	parseExpressions, 
+	parseFunctionSignature,
+	parseImport 
+} from 'acorn-sontag';
 
 /* 
 	Parses a Sontag-flavored expression 
@@ -30,6 +35,10 @@ export function func(str) {
 
 export function expressions(str) {
 	return parseExpressions(str, { async: true });
+}
+
+export function importStatement(str) {
+	return parseImport(str);
 }
 
 /*

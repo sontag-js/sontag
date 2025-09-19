@@ -1,0 +1,15 @@
+{% import notes from 'import/components/notes.html' %}
+{{ notes.alert('Yawn') }}
+{{ notes.outside }}
+{{ notes.inside ?? 'not found' }}
+{{ notes._private ?? 'can’t private' }}
+{{ notes.pub }}
+---
+{}
+---
+<div class='alert'>Alert: Yawn</div>
+
+outside
+not found
+can’t private
+private

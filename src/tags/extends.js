@@ -11,8 +11,7 @@ import { expression } from '../parse.js';
 
 	Usage notes:
 		
-		Must be first tag present in the template.
-		Any content before template is printed literally.
+
 
  */
 export default class ExtendsTag extends Tag {
@@ -21,11 +20,24 @@ export default class ExtendsTag extends Tag {
 
 	parseArgs(signature) {
 		return {
-			expression: expression(signature)
+			candidates: expression(signature)
 		};
 	}
 
 	async render(scope, children, env) {
-		// todo
+		const { candidates } = this.args();
+		/*
+			TODO: read block definitions from child template
+			and send them when rendering the parent template.
+
+			TODO: Render `ret` INSTEAD of child template contents,
+			not inline as it does now.
+		*/
+		const context = {};
+		const ret = env.render(await candidates.call(scope), context);
+		if (ret === null) {
+			throw new Error(`Can’t find any of: ${ candidates }`);
+		}
+		return ret;
 	}
 }
