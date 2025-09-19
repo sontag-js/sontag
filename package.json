@@ -7,7 +7,7 @@
   "repository": "git@github.com:sontag-js/sontag.git",
   "license": "MIT",
   "dependencies": {
-    "acorn-sontag": "^0.11.0",
+    "acorn-sontag": "^0.12.0",
     "memoize-one": "^6.0.0",
     "symbol-tree": "^3.2.4"
   },

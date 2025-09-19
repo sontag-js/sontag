@@ -1,5 +1,6 @@
 import { Tag } from '../node.js';
-import { expression } from '../parse.js';
+import { expression, expressions, wrapAwait } from '../parse.js';
+import { flattenPrototypes } from '../util.js';
 
 export const INCLUDE = /^([^]+?)(\s+ignore\s+missing)?(?:\s+with\s+([^]+?))?(\s+only)?$/;
 
@@ -11,15 +12,34 @@ export default class IncludeTag extends Tag {
 	static singular = true;
 
 	parseArgs(signature) {
-		let res = signature.match(INCLUDE); 
-		// => [str, template, ignore missing, own_scope, only ] 
-		if (!res) throw new Error(`${this}: Syntax error`);
-		return {
-			template: expression(res[1]),
-			ignore_missing: Boolean(res[2]),
-			own_scope: expression(res[3]),
-			only: Boolean(res[4])
+		let expr = expressions(signature);
+		const ret = {
+			template: wrapAwait(expr.shift()),
+			ignore_missing: false,
+			only: false
 		};
+		if (expr.length >= 2 && expr[0] === 'this.ignore' && expr[1] === 'this.missing') {
+			ret.ignore_missing = true;
+			expr.shift();
+			expr.shift();
+		}
+
+		if (expr.length >=2 && expr[0] === 'this.with' && expr[1]) {
+			ret.own_scope = wrapAwait(expr[1]);
+			expr.shift();
+			expr.shift();
+		}
+
+		if (expr.length && expr[0] === 'this.only') {
+			ret.only = true;
+			expr.shift();
+		}
+
+		if (expr.length) {
+			throw new Error('Syntax error');
+		}
+
+		return ret;
 	}
 
 	async render(scope, children, env) {
@@ -28,6 +48,12 @@ export default class IncludeTag extends Tag {
 			Object.create(only ? env.global_scope : scope),
 			own_scope === undefined ? {} : await own_scope.call(scope)
 		);
-		return env.render(await template.call(scope), inner_scope, ignore_missing);
+		/*
+			Rendering uses only inner_scope’s own enumerable properties
+			and discards its prototype chain. In order to render another file correctly,
+			we must flatten the prototype chain into a simple object.
+		*/
+		const context = flattenPrototypes(inner_scope, env.global_scope);
+		return env.render(await template.call(scope), context, ignore_missing);
 	}
 }
