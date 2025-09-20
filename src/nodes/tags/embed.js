@@ -1,6 +1,6 @@
 import IncludeTag from './include.js';
-import { expression } from '../parse.js';
-import { flattenPrototypes } from '../util.js';
+import { expression } from '../../parse.js';
+import { flattenPrototypes } from '../../util.js';
 
 /*
 	Embed

@@ -1,5 +1,5 @@
-import { Tag } from '../node.js';
-import { func, expression } from '../parse.js';
+import Tag from '../tag.js';
+import { func, expression } from '../../parse.js';
 
 /*
 	Define a macro

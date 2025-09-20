@@ -1,6 +1,6 @@
-import { Tag } from '../node.js';
-import { expressions, wrapAsync } from '../parse.js';
-import { flattenPrototypes } from '../util.js';
+import Tag from '../tag.js';
+import { expressions, wrapAsync } from '../../parse.js';
+import { flattenPrototypes } from '../../util.js';
 
 /*
 	Include a template.

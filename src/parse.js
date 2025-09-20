@@ -3,6 +3,17 @@ import { ancestor } from 'acorn-walk';
 import { replace } from 'estraverse';
 import { generate } from 'astring';
 
+/*
+	Regular expression from: 
+	https://github.com/tc39/proposal-regexp-unicode-property-escapes
+*/
+
+const IDENTIFIER_REGEX = /[$_\p{ID_Start}][$\u200C\u200D\p{ID_Continue}]*/u;
+
+// Source: https://262.ecma-international.org/14.0/#sec-keywords-and-reserved-words
+const RESERVED_KEYWORDS = 'await break case catch class const continue debugger default delete do else enum export extends false finally for function if import in instanceof new null return super switch this throw true try typeof var void while with yield';
+const FUTURE_RESERVED_KEYWORDS = 'implements interface package private protected public';
+
 const REPLACEMENT_CHAR = '\uFFFD';
 const SENTINEL_CODE = 0xfffe;
 const SENTINEL_CHAR = '\uFFFE';
@@ -33,6 +44,9 @@ function binop(prec) {
 }
 
 const SONTAG_SYNTAX = [
+	/*
+		Filter operator: a | b
+	*/
 	{
 		match: /(?<!\|)(\|)(?!\|)/g,
 		original: '|',
@@ -48,7 +62,10 @@ const SONTAG_SYNTAX = [
 					...right,
 					arguments: right.arguments.concat(left)
 				};
-				return opts.async ? wrapAwait(replacement) : replacement;
+				return opts.async ? {
+					type: "AwaitExpression",
+					argument: replacement
+				} : replacement;
 			} else if (right.type === 'Identifier') {
 				// We have an identifier on the right-hand side,
 				// make it a function that calls the left-hand side
@@ -58,10 +75,16 @@ const SONTAG_SYNTAX = [
 					callee: right,
 					arguments: [ left ]
 				};
-				return opts.async ? wrapAwait(replacement) : replacement;
+				return opts.async ? {
+					type: "AwaitExpression",
+					argument: replacement
+				} : replacement;
 			}
 		}
 	},
+	/*
+		Range operator: a..b
+	*/
 	{
 		match: /(?<!\.)\.{2}(?!\.)/g,
 		original: '..',
@@ -78,6 +101,10 @@ const SONTAG_SYNTAX = [
 			};
 		}
 	},
+
+	/*
+		Truncation operator: a // b
+	*/
 	{
 		match: /(?<!\/)\/{2}(?!\/)/g,
 		original: '//',
@@ -96,6 +123,9 @@ const SONTAG_SYNTAX = [
 			};
 		}
 	},
+	/*
+		a not in b
+	*/
 	{
 		match: /\bnot in\b/g,
 		original: 'not in',
@@ -121,6 +151,10 @@ const SONTAG_SYNTAX = [
 			};
 		}
 	},
+
+	/*
+		a in b
+	*/
 	{
 		match: /\bin\b/g,
 		original: 'in',
@@ -142,7 +176,7 @@ const SONTAG_SYNTAX = [
 		}
 	},
 
-	// Operators
+	// a b-and b
 	{ 
 		match: /\bb-and\b/g, 
 		original: 'b-and',
@@ -152,6 +186,8 @@ const SONTAG_SYNTAX = [
 			return node;
 		}
 	},
+
+	// a b-xor b
 	{ 
 		match: /\bb-xor\b/g, 
 		original: 'b-xor',
@@ -161,6 +197,8 @@ const SONTAG_SYNTAX = [
 			return node;
 		}
 	},
+
+	// a b-or b
 	{ 
 		match: /\bb-or\b/g, 
 		original: 'b-or',
@@ -170,6 +208,8 @@ const SONTAG_SYNTAX = [
 			return node;
 		}
 	},
+
+	// a and b
 	{ 
 		match: /\band\b/g, 
 		original: 'and',
@@ -179,6 +219,8 @@ const SONTAG_SYNTAX = [
 			return node;
 		}
 	},
+
+	// a or b
 	{ 
 		match: /\bor\b/g, 
 		original: 'or',
@@ -188,6 +230,8 @@ const SONTAG_SYNTAX = [
 			return node;
 		}
 	},
+
+	// not a
 	{ 
 		match: /\bnot\b/g, 
 		original: 'not',
@@ -201,6 +245,8 @@ const SONTAG_SYNTAX = [
 			return node;
 		}
 	},
+
+	// Concatenation: a ~ b (equiv. a + b)
 	{ 
 		match: /(?<!~)~(?!~)/g, 
 		original: '~',
@@ -255,13 +301,6 @@ class SontagParser extends Parser {
 		}
 		return super.readToken(code);
 	}
-}
-
-function wrapAwait(node) {
-	return {
-		type: "AwaitExpression",
-		argument: node
-	};
 }
 
 function prepareInput(str = '') {
@@ -524,13 +563,6 @@ export function expressions(str) {
 export function importStatement(str) {
 	return parseImport(str);
 }
-
-/*
-	Regular expression from: 
-	https://github.com/tc39/proposal-regexp-unicode-property-escapes
-*/
-
-const IDENTIFIER_REGEX = /[$_\p{ID_Start}][$\u200C\u200D\p{ID_Continue}]*/u;
 
 export function identifier(str) {
 	return str?.trim().match(IDENTIFIER_REGEX)?.[0] ?? null;

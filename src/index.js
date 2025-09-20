@@ -1,5 +1,4 @@
 import SymbolTree from 'symbol-tree';
-import { Root, Text, Expression } from './node.js';
 import fsLoader from './loaders/fs.js';
 
 // Functions
@@ -8,20 +7,23 @@ import DumpFunction from './functions/dump.js';
 // Filters
 import BatchFilter from './filters/batch.js';
 
-// Tags
-import ApplyTag from './tags/apply.js';
-import BlockTag from './tags/block.js';
-import CallTag from './tags/call.js';
-import EmbedTag from './tags/embed.js';
-import ExtendsTag from './tags/extends.js';
-import ForTag from './tags/for.js';
-import IfTag from './tags/if.js';
-import ImportTag from './tags/import.js';
-import IncludeTag from './tags/include.js';
-import MacroTag from './tags/macro.js';
-import SetTag from './tags/set.js';
-import UseTag from './tags/use.js';
-import WithTag from './tags/with.js';
+// Nodes
+import Root from './nodes/root.js'
+import Text from './nodes/text.js'
+import Expression from './nodes/expression.js';
+import ApplyTag from './nodes/tags/apply.js';
+import BlockTag from './nodes/tags/block.js';
+import CallTag from './nodes/tags/call.js';
+import EmbedTag from './nodes/tags/embed.js';
+import ExtendsTag from './nodes/tags/extends.js';
+import ForTag from './nodes/tags/for.js';
+import IfTag from './nodes/tags/if.js';
+import ImportTag from './nodes/tags/import.js';
+import IncludeTag from './nodes/tags/include.js';
+import MacroTag from './nodes/tags/macro.js';
+import SetTag from './nodes/tags/set.js';
+import UseTag from './nodes/tags/use.js';
+import WithTag from './nodes/tags/with.js';
 
 export const TAG_PARTS = /^\s*([^\s]+)\s*([^]*)$/;
 
@@ -430,4 +432,3 @@ class Sontag {
 }
 
 export default Sontag;
-export * as types from './node.js';

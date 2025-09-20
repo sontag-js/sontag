@@ -1,5 +1,5 @@
-import { Tag } from '../node.js';
-import { expression } from '../parse.js';
+import Tag from '../tag.js';
+import { expression } from '../../parse.js';
 
 export const WITH = /^([^]+?)?(\s+only)?$/;
 

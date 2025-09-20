@@ -1,5 +1,5 @@
-import { Tag } from '../node.js';
-import { identifier } from '../parse.js';
+import Tag from '../tag.js';
+import { identifier } from '../../parse.js';
 
 const BLOCK = /^([^\s]+)(?:\s+([^]+))?$/;
 

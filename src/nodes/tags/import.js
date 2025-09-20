@@ -1,5 +1,5 @@
-import { Tag } from '../node.js';
-import { expression, importStatement } from '../parse.js';
+import Tag from '../tag.js';
+import { expression, importStatement } from '../../parse.js';
 
 /*
 	Import macros and other exports from a template.

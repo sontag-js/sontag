@@ -1,5 +1,5 @@
-import { Tag } from '../node.js';
-import { expression, identifier } from '../parse.js';
+import Tag from '../tag.js';
+import { expression, identifier } from '../../parse.js';
 
 /*
 	The {% set %} tag allows assignments.
