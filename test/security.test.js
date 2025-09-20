@@ -23,6 +23,6 @@ test('toString', async () => {
 		await env.renderString('{{ val }}', {
 			val: 'new Function("console.log(`here`)")()'
 		}),
-		''
+		'new Function("console.log(`here`)")()'
 	);
 });

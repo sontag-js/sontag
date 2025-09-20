@@ -7,7 +7,10 @@
   "repository": "git@github.com:sontag-js/sontag.git",
   "license": "MIT",
   "dependencies": {
-    "acorn-sontag": "^0.14.0",
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
+    "astring": "^1.9.0",
+    "estraverse": "^5.3.0",
     "memoize-one": "^6.0.0",
     "symbol-tree": "^3.2.4"
   },
