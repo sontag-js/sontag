@@ -11,7 +11,7 @@ import { expression } from '../parse.js';
 
 	Usage notes:
 		
-
+		Can appear anywhere in the template.
 
  */
 export default class ExtendsTag extends Tag {

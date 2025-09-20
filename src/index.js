@@ -3,11 +3,7 @@ import { Root, Text, Expression } from './node.js';
 import fsLoader from './loaders/fs.js';
 
 // Functions
-import BlockFunction from './functions/block.js';
 import DumpFunction from './functions/dump.js';
-import ParentFunction from './functions/parent.js';
-import SuperFunction from './functions/parent.js';
-import SourceFunction from './functions/source.js';
 
 // Filters
 import BatchFilter from './filters/batch.js';
@@ -54,13 +50,9 @@ class Sontag {
 		this.global_scope = Object.assign(
 			Object.create(null),
 			{
-				// Built-in functions	
-				block: BlockFunction.bind(this),
+				// Built-in functions
 				dump: DumpFunction.bind(this),
-				parent: ParentFunction.bind(this),
-				super: SuperFunction.bind(this),
-				source: SourceFunction.bind(this),
-
+				
 				/* 
 					Standard built-in objects
 					See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects 
@@ -327,12 +319,19 @@ class Sontag {
 	async renderTree(tree, $node, scope) {
 		const renderChildren = async (inner_scope) => {
 			const texts = [];
+			const blocks = [];
+			const is_extending = inner_scope[Symbol.for('sontag/extends')];
 			for (let $childNode of tree.childrenToArray($node)) {
-				texts.push(
-					await this.renderTree(tree, $childNode, inner_scope)
-				);
+				const text = await this.renderTree(tree, $childNode, inner_scope);
+				if (is_extending) {
+					if (typeof text === 'object') {
+						blocks.push(text);
+					}
+				} else {
+					texts.push(text);
+				}
 			}
-			return texts.join('');
+			return is_extending ? blocks : texts.join('');
 		};
 
 		if ($node.bindings) {

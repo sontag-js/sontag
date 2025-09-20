@@ -1,5 +1,5 @@
 import { Tag } from '../node.js';
-import { expressions, wrapAwait } from '../parse.js';
+import { expressions, wrapAsync } from '../parse.js';
 import { flattenPrototypes } from '../util.js';
 
 /*
@@ -12,7 +12,7 @@ export default class IncludeTag extends Tag {
 	parseArgs(signature) {
 		let expr = expressions(signature);
 		const ret = {
-			template: wrapAwait(expr.shift()),
+			template: wrapAsync(expr.shift()),
 			ignore_missing: false,
 			only: false
 		};
@@ -23,7 +23,7 @@ export default class IncludeTag extends Tag {
 		}
 
 		if (expr.length >=2 && expr[0] === 'this.with' && expr[1]) {
-			ret.own_scope = wrapAwait(expr[1]);
+			ret.own_scope = wrapAsync(expr[1]);
 			expr.shift();
 			expr.shift();
 		}

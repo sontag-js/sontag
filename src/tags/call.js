@@ -1,5 +1,5 @@
 import { Tag } from '../node.js';
-import { expression, wrapAwait } from '../parse.js';
+import { expression } from '../parse.js';
 
 export default class CallTag extends Tag {
 	static tagNames = ['call'];

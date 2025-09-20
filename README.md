@@ -6,11 +6,9 @@ A just-enough template language in the vein of [Twig](https://twig.symfony.com/)
 
 ## A note on security
 
-Just to get this out of the way: Sontag is written with static website generators in mind. The ones where you write the content and the templates yourself and the website gets built into static HTML files for other people to read and enjoy. 
+Sontag is basically a JavaScript runtime, primarily meant to be used in static site generators with your own templates and your own content. __Do not use Sontag with untrusted templates and do not populate your templates with untrusted content__, which is akin to running untrusted scripts on the machine or in the browser.
 
-It does __not__ include, at least for the time being, precautions such as autoescaping, nor protection against XSS attacks, nor a sandboxed environment. __Do not use it to generate dynamic output based on user-provided templates or content.__
-
-Now, onwards to the good stuff.
+See [SECURITY.md](./SECURITY.md) for more details.
 
 ## Installation
 
