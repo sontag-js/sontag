@@ -16,10 +16,6 @@ let tests = {
 	// Reserved keywords:
 	'{ class: "my-class", for: "my-input" }': 'return {\n  class: "my-class",\n  for: "my-input"\n}',
 
-	// Special operators
-	'a..z': 'return this[Symbol.for("sontag/filters")].range(this.a, this.z)',
-	'1 // 2': 'return Math.trunc(1 / 2)',
-
 	// Operators
 	'1 and 2': 'return 1 && 2',
 	'1 or 2': 'return 1 || 2',

@@ -20,9 +20,7 @@ const SENTINEL_CHAR = '\uFFFE';
 
 const DEFAULT_OPTS = {
 	async: false,
-	rangeFunction: 'this[Symbol.for("sontag/filters")].range',
 	identifierScope: 'this',
-	truncFunction: 'Math.trunc',
 	filterScope: 'this[Symbol.for("sontag/filters")]'
 };
 
@@ -80,47 +78,6 @@ const SONTAG_SYNTAX = [
 					argument: replacement
 				} : replacement;
 			}
-		}
-	},
-	/*
-		Range operator: a..b
-	*/
-	{
-		match: /(?<!\.)\.{2}(?!\.)/g,
-		original: '..',
-		token: binop(8.6),
-		replacement: (node, opts) => {
-			let { left, right } = node;
-			return {
-				type: 'CallExpression',
-				callee: {
-					type: 'Identifier',
-					name: opts.rangeFunction
-				},
-				arguments: [ left, right ]
-			};
-		}
-	},
-
-	/*
-		Truncation operator: a // b
-	*/
-	{
-		match: /(?<!\/)\/{2}(?!\/)/g,
-		original: '//',
-		token: binop(10),
-		replacement: (node, opts) => {
-			return {
-				type: 'CallExpression',
-				callee: {
-					type: 'Identifier',
-					name: opts.truncFunction
-				},
-				arguments: [{
-					...node,
-					operator: '/' 
-				}]
-			};
 		}
 	},
 	/*
@@ -242,17 +199,6 @@ const SONTAG_SYNTAX = [
 		},
 		replacement: (node, opts) => {
 			node.operator = '!';
-			return node;
-		}
-	},
-
-	// Concatenation: a ~ b (equiv. a + b)
-	{ 
-		match: /(?<!~)~(?!~)/g, 
-		original: '~',
-		token: binop(9),
-		replacement: (node, opts) => {
-			node.operator = '+';
 			return node;
 		}
 	}

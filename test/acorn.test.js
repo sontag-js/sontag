@@ -9,20 +9,6 @@ test('operator: in', t => {
 	);
 });
 
-test('operator: range', t => {
-	assert.equal(parseExpression('1..5'), 'this[Symbol.for("sontag/filters")].range(1, 5)');
-	assert.equal(parseExpression('1..a'), 'this[Symbol.for("sontag/filters")].range(1, this.a)');
-	assert.equal(parseExpression('"a".."z"'), 'this[Symbol.for("sontag/filters")].range("a", "z")');
-	assert.equal(
-		parseExpression('"a".."z" | each(uppercase)'), 
-		'this[Symbol.for("sontag/filters")].each(this.uppercase, this[Symbol.for("sontag/filters")].range("a", "z"))'
-	);
-});
-
-test('operator: truncate', t => {
-	assert.equal(parseExpression('a // 5'), 'Math.trunc(this.a / 5)');
-});
-
 test('operator: filter', t => {
 	assert.equal(
 		parseExpression('posts[posts.length - 1] | escape'), 
@@ -106,13 +92,8 @@ test('operators', () => {
 	);
 
 	assert.equal(
-		parseExpression('1..10'),
-		'this[Symbol.for("sontag/filters")].range(1, 10)'
-	);
-
-	assert.equal(
-		parseExpression('["post-"~ post.type, "po~st"]'),
-		'["post-" + this.post.type, "po~st"]'
+		parseExpression('["post-"+ post.type, "po+st"]'),
+		'["post-" + this.post.type, "po+st"]'
 	);
 
 	assert.equal(
@@ -123,11 +104,6 @@ test('operators', () => {
 	assert.equal(
 		parseExpression('featured and not posts | length'),
 		'this[Symbol.for("sontag/filters")].length(this.featured && !this.posts)'
-	);
-
-	assert.equal(
-		parseExpression('posts[a // 100]'),
-		'this.posts[Math.trunc(this.a / 100)]'
 	);
 
 	assert.equal(
@@ -212,7 +188,7 @@ test('parseFunctionSignature', () => {
 });
 
 test('parseExpressions', () => {
-	const expr = '["post" ~ type ~ ".son", "post.son"] | reverse with {x:{y: "z"}} only';
+	const expr = '["post" + type + ".son", "post.son"] | reverse with {x:{y: "z"}} only';
 	assert.deepStrictEqual(
 		parseExpressions(expr),
 		[
