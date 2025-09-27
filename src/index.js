@@ -3,6 +3,7 @@ import fsLoader from './loaders/fs.js';
 
 // Functions
 import DumpFunction from './functions/dump.js';
+import BitorFunction from './functions/bitor.js';
 
 // Filters
 import BatchFilter from './filters/batch.js';
@@ -54,6 +55,7 @@ class Sontag {
 			{
 				// Built-in functions
 				dump: DumpFunction.bind(this),
+				bitor: BitorFunction.bind(this),
 				
 				/* 
 					Standard built-in objects

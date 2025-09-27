@@ -72,21 +72,6 @@ test('operators', () => {
 	);
 
 	assert.equal(
-		parseExpression('a b-and b'),
-		'this.a & this.b'
-	);
-
-	assert.equal(
-		parseExpression('a b-or b'),
-		'this.a | this.b'
-	);
-
-	assert.equal(
-		parseExpression('a b-xor b'),
-		'this.a ^ this.b'
-	);
-
-	assert.equal(
 		parseExpression('a ?? b'),
 		'this.a ?? this.b'
 	);

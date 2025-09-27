@@ -133,39 +133,6 @@ const SONTAG_SYNTAX = [
 		}
 	},
 
-	// a b-and b
-	{ 
-		match: /\bb-and\b/g, 
-		original: 'b-and',
-		token: binop(5),
-		replacement: (node, opts) => {
-			node.operator = '&';
-			return node;
-		}
-	},
-
-	// a b-xor b
-	{ 
-		match: /\bb-xor\b/g, 
-		original: 'b-xor',
-		token: binop(4),
-		replacement: (node, opts) => {
-			node.operator = '^';
-			return node;
-		}
-	},
-
-	// a b-or b
-	{ 
-		match: /\bb-or\b/g, 
-		original: 'b-or',
-		token: binop(3),
-		replacement: (node, opts) => {
-			node.operator = '|';
-			return node;
-		}
-	},
-
 	// a and b
 	{ 
 		match: /\band\b/g, 

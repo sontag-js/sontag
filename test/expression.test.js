@@ -18,10 +18,7 @@ let tests = {
 
 	// Operators
 	'1 and 2': 'return 1 && 2',
-	'1 or 2': 'return 1 || 2',
-	'1 b-and 2': 'return 1 & 2',
-	'1 b-or 2': 'return 1 | 2',
-	'1 b-xor 2': 'return 1 ^ 2'
+	'1 or 2': 'return 1 || 2'
 };
 
 test('expression', t => {
