@@ -2,13 +2,6 @@ import { parseExpression, parseImport, parseExpressions, parseFunctionSignature 
 import assert from 'node:assert';
 import test from 'node:test';
 
-test('operator: in', t => {
-	assert.equal(
-		parseExpression('str in array'),
-		'this.array.includes(this.str)'
-	);
-});
-
 test('operator: filter', t => {
 	assert.equal(
 		parseExpression('posts[posts.length - 1] | escape'), 
@@ -89,16 +82,6 @@ test('operators', () => {
 	assert.equal(
 		parseExpression('featured and not posts | length'),
 		'this[Symbol.for("sontag/filters")].length(this.featured && !this.posts)'
-	);
-
-	assert.equal(
-		parseExpression('post in posts'),
-		'this.posts.includes(this.post)'
-	);
-
-	assert.equal(
-		parseExpression('post not in posts'),
-		'!this.posts.includes(this.post)'
 	);
 });
 

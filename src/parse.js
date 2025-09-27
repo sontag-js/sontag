@@ -41,9 +41,16 @@ function binop(prec) {
 	};
 }
 
+/*
+	Sontag syntax extensions to JavaScript
+	--------------------------------------
+*/
 const SONTAG_SYNTAX = [
 	/*
 		Filter operator: a | b
+
+		Takes over from the bitwise-or operator,
+		which is available as the bitor(a, b) built-in function.
 	*/
 	{
 		match: /(?<!\|)(\|)(?!\|)/g,
@@ -78,58 +85,6 @@ const SONTAG_SYNTAX = [
 					argument: replacement
 				} : replacement;
 			}
-		}
-	},
-	/*
-		a not in b
-	*/
-	{
-		match: /\bnot in\b/g,
-		original: 'not in',
-		token: binop(8.4),
-		replacement: (node, opts) => {
-			return {
-				type: 'UnaryExpression',
-				operator: '!',
-				prefix: true,
-				argument: {
-				type: 'CallExpression',
-					callee: {
-						type: 'MemberExpression',
-						object: node.right,
-						property: { 
-							type: 'Identifier', 
-							name: 'includes' 
-						},
-						computed: false
-					},
-					arguments: [node.left]
-				}
-			};
-		}
-	},
-
-	/*
-		a in b
-	*/
-	{
-		match: /\bin\b/g,
-		original: 'in',
-		token: binop(8.4),
-		replacement: (node, opts) => {
-			return {
-				type: 'CallExpression',
-				callee: {
-					type: 'MemberExpression',
-					object: node.right,
-					property: { 
-						type: 'Identifier', 
-						name: 'includes' 
-					},
-					computed: false
-				},
-				arguments: [node.left]
-			};
 		}
 	},
 
